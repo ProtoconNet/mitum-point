@@ -8,10 +8,10 @@ import (
 	"github.com/ProtoconNet/mitum2/base"
 )
 
-var TokenPrefix = "token:"
+var PointPrefix = "point:"
 
-func StateKeyTokenPrefix(contract base.Address) string {
-	return fmt.Sprintf("%s%s", TokenPrefix, contract)
+func StateKeyPointPrefix(contract base.Address) string {
+	return fmt.Sprintf("%s%s", PointPrefix, contract)
 }
 
 type StateKeyGenerator struct {
@@ -28,8 +28,8 @@ func (g StateKeyGenerator) Design() string {
 	return StateKeyDesign(g.contract)
 }
 
-func (g StateKeyGenerator) TokenBalance(address base.Address) string {
-	return StateKeyTokenBalance(g.contract, address)
+func (g StateKeyGenerator) PointBalance(address base.Address) string {
+	return StateKeyPointBalance(g.contract, address)
 }
 
 func ParseStateKey(key string, Prefix string) ([]string, error) {
@@ -45,9 +45,9 @@ func ParseStateKey(key string, Prefix string) ([]string, error) {
 }
 
 func IsStateDesignKey(key string) bool {
-	return strings.HasPrefix(key, TokenPrefix) && strings.HasSuffix(key, DesignSuffix)
+	return strings.HasPrefix(key, PointPrefix) && strings.HasSuffix(key, DesignSuffix)
 }
 
-func IsStateTokenBalanceKey(key string) bool {
-	return strings.HasPrefix(key, TokenPrefix) && strings.HasSuffix(key, TokenBalanceSuffix)
+func IsStatePointBalanceKey(key string) bool {
+	return strings.HasPrefix(key, PointPrefix) && strings.HasSuffix(key, PointBalanceSuffix)
 }

@@ -2,10 +2,10 @@ package cmds
 
 import (
 	"context"
+	"github.com/ProtoconNet/mitum-point/operation/point"
 
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
-	"github.com/ProtoconNet/mitum-token/operation/token"
-	"github.com/ProtoconNet/mitum-token/utils"
+	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/pkg/errors"
 
 	"github.com/ProtoconNet/mitum2/base"
@@ -14,7 +14,7 @@ import (
 
 type BurnCommand struct {
 	OperationCommand
-	Target currencycmds.AddressFlag `arg:"" name:"target" help:"token target" required:"true"`
+	Target currencycmds.AddressFlag `arg:"" name:"target" help:"target account" required:"true"`
 	Amount currencycmds.BigFlag     `arg:"" name:"amount" help:"amount to burn" required:"true"`
 	target base.Address
 }
@@ -58,7 +58,7 @@ func (cmd *BurnCommand) parseFlags() error {
 func (cmd *BurnCommand) createOperation() (base.Operation, error) { // nolint:dupl}
 	e := util.StringError(utils.ErrStringCreate("burn operation"))
 
-	fact := token.NewBurnFact(
+	fact := point.NewBurnFact(
 		[]byte(cmd.Token),
 		cmd.sender, cmd.contract,
 		cmd.Currency.CID,
@@ -66,7 +66,7 @@ func (cmd *BurnCommand) createOperation() (base.Operation, error) { // nolint:du
 		cmd.Amount.Big,
 	)
 
-	op := token.NewBurn(fact)
+	op := point.NewBurn(fact)
 	if err := op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID()); err != nil {
 		return nil, e.Wrap(err)
 	}

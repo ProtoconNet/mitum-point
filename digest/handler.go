@@ -20,8 +20,8 @@ import (
 )
 
 var (
-	HandlerPathToken        = `/token/{contract:.*}`
-	HandlerPathTokenBalance = `/token/{contract:.*}/account/{address:(?i)` + base.REStringAddressString + `}` // revive:disable-line:line-length-limit
+	HandlerPathPoint        = `/point/{contract:.*}`
+	HandlerPathPointBalance = `/point/{contract:.*}/account/{address:(?i)` + base.REStringAddressString + `}` // revive:disable-line:line-length-limit
 )
 
 func init() {
@@ -111,9 +111,9 @@ func (hd *Handlers) Handler() http.Handler {
 }
 
 func (hd *Handlers) setHandlers() {
-	_ = hd.setHandler(HandlerPathTokenBalance, hd.handleTokenBalance, true).
+	_ = hd.setHandler(HandlerPathPointBalance, hd.handlePointBalance, true).
 		Methods(http.MethodOptions, "GET")
-	_ = hd.setHandler(HandlerPathToken, hd.handleToken, true).
+	_ = hd.setHandler(HandlerPathPoint, hd.handlePoint, true).
 		Methods(http.MethodOptions, "GET")
 }
 

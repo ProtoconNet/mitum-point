@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ProtoconNet/mitum-token/cmds"
+	"github.com/ProtoconNet/mitum-point/cmds"
 	launchcmd "github.com/ProtoconNet/mitum2/launch/cmd"
 
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
@@ -33,7 +33,7 @@ var CLI struct { //nolint:govet //...
 	Operation struct {
 		Currency currencycmds.CurrencyCommand `cmd:"" help:"currency operation"`
 		Suffrage currencycmds.SuffrageCommand `cmd:"" help:"suffrage operation"`
-		Token    cmds.TokenCommand            `cmd:"" help:"token operation"`
+		Point    cmds.PointCommand            `cmd:"" help:"point operation"`
 	} `cmd:"" help:"create operation"`
 	Network struct {
 		Client cmds.NetworkClientCommand `cmd:"" help:"network client"`

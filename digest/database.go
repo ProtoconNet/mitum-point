@@ -4,8 +4,8 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-currency/v3/digest/util"
-	"github.com/ProtoconNet/mitum-token/state"
-	"github.com/ProtoconNet/mitum-token/types"
+	"github.com/ProtoconNet/mitum-point/state"
+	"github.com/ProtoconNet/mitum-point/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,18 +18,18 @@ var (
 	defaultColNameCurrency        = "digest_cr"
 	defaultColNameOperation       = "digest_op"
 	defaultColNameBlock           = "digest_bm"
-	defaultColNameToken           = "digest_token"
-	defaultColNameTokenBalance    = "digest_token_bl"
+	defaultColNamePoint           = "digest_point"
+	defaultColNamePointBalance    = "digest_point_bl"
 )
 
-func Token(st *currencydigest.Database, contract string) (*types.Design, error) {
+func Point(st *currencydigest.Database, contract string) (*types.Design, error) {
 	filter := util.NewBSONFilter("contract", contract)
 
 	var design *types.Design
 	var sta mitumbase.State
 	var err error
 	if err := st.DatabaseClient().GetByFilter(
-		defaultColNameToken,
+		defaultColNamePoint,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
 			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
@@ -52,7 +52,7 @@ func Token(st *currencydigest.Database, contract string) (*types.Design, error) 
 	return design, nil
 }
 
-func TokenBalance(st *currencydigest.Database, contract, account string) (common.Big, error) {
+func PointBalance(st *currencydigest.Database, contract, account string) (common.Big, error) {
 	filter := util.NewBSONFilter("contract", contract)
 	filter = filter.Add("address", account)
 
@@ -60,7 +60,7 @@ func TokenBalance(st *currencydigest.Database, contract, account string) (common
 	var sta mitumbase.State
 	var err error
 	if err := st.DatabaseClient().GetByFilter(
-		defaultColNameTokenBalance,
+		defaultColNamePointBalance,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
 			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
@@ -68,7 +68,7 @@ func TokenBalance(st *currencydigest.Database, contract, account string) (common
 				return err
 			}
 
-			amount, err = state.StateTokenBalanceValue(sta)
+			amount, err = state.StatePointBalanceValue(sta)
 			if err != nil {
 				return err
 			}

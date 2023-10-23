@@ -34,8 +34,8 @@ type BlockSession struct {
 	balanceModels         []mongo.WriteModel
 	currencyModels        []mongo.WriteModel
 	contractAccountModels []mongo.WriteModel
-	tokenModels           []mongo.WriteModel
-	tokenBalanceModels    []mongo.WriteModel
+	pointModels           []mongo.WriteModel
+	pointBalanceModels    []mongo.WriteModel
 	statesValue           *sync.Map
 	balanceAddressList    []string
 }
@@ -81,7 +81,7 @@ func (bs *BlockSession) Prepare() error {
 	if err := bs.prepareCurrencies(); err != nil {
 		return err
 	}
-	if err := bs.prepareToken(); err != nil {
+	if err := bs.preparePoint(); err != nil {
 		return err
 	}
 
@@ -133,14 +133,14 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 		}
 	}
 
-	if len(bs.tokenModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameToken, bs.tokenModels); err != nil {
+	if len(bs.pointModels) > 0 {
+		if err := bs.writeModels(ctx, defaultColNamePoint, bs.pointModels); err != nil {
 			return err
 		}
 	}
 
-	if len(bs.tokenBalanceModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameTokenBalance, bs.tokenBalanceModels); err != nil {
+	if len(bs.pointBalanceModels) > 0 {
+		if err := bs.writeModels(ctx, defaultColNamePointBalance, bs.pointBalanceModels); err != nil {
 			return err
 		}
 	}
@@ -373,8 +373,8 @@ func (bs *BlockSession) close() error {
 	bs.accountModels = nil
 	bs.balanceModels = nil
 	bs.contractAccountModels = nil
-	bs.tokenModels = nil
-	bs.tokenBalanceModels = nil
+	bs.pointModels = nil
+	bs.pointBalanceModels = nil
 
 	return bs.st.Close()
 }

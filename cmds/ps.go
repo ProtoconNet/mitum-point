@@ -2,13 +2,12 @@ package cmds
 
 import (
 	"context"
+	"github.com/ProtoconNet/mitum-point/operation/point"
 
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	currencyprocessor "github.com/ProtoconNet/mitum-currency/v3/operation/processor"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	"github.com/ProtoconNet/mitum-token/operation/token"
-
-	"github.com/ProtoconNet/mitum-token/operation/processor"
+	"github.com/ProtoconNet/mitum-point/operation/processor"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/isaac"
 	"github.com/ProtoconNet/mitum2/launch"
@@ -17,7 +16,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/ps"
 )
 
-var PNameOperationProcessorsMap = ps.Name("mitum-dao-operation-processors-map")
+var PNameOperationProcessorsMap = ps.Name("mitum-point-operation-processors-map")
 
 type processorInfo struct {
 	hint      hint.Hint
@@ -49,12 +48,12 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 	}
 
 	ps := []processorInfo{
-		{token.RegisterTokenHint, token.NewRegisterTokenProcessor()},
-		{token.MintHint, token.NewMintProcessor()},
-		{token.BurnHint, token.NewBurnProcessor()},
-		{token.ApproveHint, token.NewApproveProcessor()},
-		{token.TransferHint, token.NewTransferProcessor()},
-		{token.TransferFromHint, token.NewTransferFromProcessor()},
+		{point.RegisterPointHint, point.NewRegisterPointProcessor()},
+		{point.MintHint, point.NewMintProcessor()},
+		{point.BurnHint, point.NewBurnProcessor()},
+		{point.ApproveHint, point.NewApproveProcessor()},
+		{point.TransferHint, point.NewTransferProcessor()},
+		{point.TransferFromHint, point.NewTransferFromProcessor()},
 	}
 
 	for _, p := range ps {

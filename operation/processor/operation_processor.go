@@ -6,8 +6,8 @@ import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency/v3/operation/extension"
 	currencyprocessor "github.com/ProtoconNet/mitum-currency/v3/operation/processor"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	"github.com/ProtoconNet/mitum-token/operation/token"
-	"github.com/ProtoconNet/mitum-token/utils"
+	"github.com/ProtoconNet/mitum-point/operation/point"
+	"github.com/ProtoconNet/mitum-point/utils"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/pkg/errors"
 )
@@ -85,43 +85,43 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op mitumbase.Op
 		did = fact.Currency().String()
 		didtype = DuplicationTypeCurrency
 	case currency.Mint:
-	case token.Mint:
-		fact, ok := t.Fact().(token.MintFact)
+	case point.Mint:
+		fact, ok := t.Fact().(point.MintFact)
 		if !ok {
 			return errors.Errorf("expected MintFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case token.RegisterToken:
-		fact, ok := t.Fact().(token.RegisterTokenFact)
+	case point.RegisterPoint:
+		fact, ok := t.Fact().(point.RegisterPointFact)
 		if !ok {
-			return errors.Errorf("expected RegisterTokenFact, not %T", t.Fact())
+			return errors.Errorf("expected RegisterPointFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case token.Burn:
-		fact, ok := t.Fact().(token.BurnFact)
+	case point.Burn:
+		fact, ok := t.Fact().(point.BurnFact)
 		if !ok {
 			return errors.Errorf("expected BurnFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case token.Approve:
-		fact, ok := t.Fact().(token.ApproveFact)
+	case point.Approve:
+		fact, ok := t.Fact().(point.ApproveFact)
 		if !ok {
 			return errors.Errorf("expected ApproveFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case token.Transfer:
-		fact, ok := t.Fact().(token.TransferFact)
+	case point.Transfer:
+		fact, ok := t.Fact().(point.TransferFact)
 		if !ok {
 			return errors.Errorf("expected TransferFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case token.TransferFrom:
-		fact, ok := t.Fact().(token.TransferFromFact)
+	case point.TransferFrom:
+		fact, ok := t.Fact().(point.TransferFromFact)
 		if !ok {
 			return errors.Errorf("expected TransferFromFact, not %T", t.Fact())
 		}
@@ -160,9 +160,9 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op mitumbase.Op
 }
 
 func checkDuplicateSender(op mitumbase.Operation) (string, currencytypes.DuplicationType, error) {
-	fact, ok := op.Fact().(token.TokenFact)
+	fact, ok := op.Fact().(point.PointFact)
 	if !ok {
-		return "", "", errors.Errorf(utils.ErrStringTypeCast(token.TokenFact{}, op.Fact()))
+		return "", "", errors.Errorf(utils.ErrStringTypeCast(point.PointFact{}, op.Fact()))
 	}
 	return fact.Sender().String(), DuplicationTypeSender, nil
 }
@@ -184,12 +184,12 @@ func GetNewProcessor(opr *currencyprocessor.OperationProcessor, op mitumbase.Ope
 		currency.RegisterCurrency,
 		currency.UpdateCurrency,
 		currency.Mint,
-		token.RegisterToken,
-		token.Mint,
-		token.Burn,
-		token.Approve,
-		token.Transfer,
-		token.TransferFrom:
+		point.RegisterPoint,
+		point.Mint,
+		point.Burn,
+		point.Approve,
+		point.Transfer,
+		point.TransferFrom:
 		return nil, false, errors.Errorf("%T needs SetProcessor", t)
 	default:
 		return nil, false, nil

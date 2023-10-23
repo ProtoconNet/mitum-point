@@ -1,4 +1,4 @@
-module github.com/ProtoconNet/mitum-token
+module github.com/ProtoconNet/mitum-point
 
 go 1.20
 

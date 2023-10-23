@@ -2,9 +2,9 @@ package cmds
 
 import (
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
-	"github.com/ProtoconNet/mitum-token/operation/token"
-	"github.com/ProtoconNet/mitum-token/state"
-	"github.com/ProtoconNet/mitum-token/types"
+	"github.com/ProtoconNet/mitum-point/operation/point"
+	"github.com/ProtoconNet/mitum-point/state"
+	"github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum2/launch"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -21,23 +21,23 @@ var AddedHinters = []encoder.DecodeDetail{
 	{Hint: types.DesignHint, Instance: types.Design{}},
 
 	{Hint: state.DesignStateValueHint, Instance: state.DesignStateValue{}},
-	{Hint: state.TokenBalanceStateValueHint, Instance: state.TokenBalanceStateValue{}},
+	{Hint: state.PointBalanceStateValueHint, Instance: state.PointBalanceStateValue{}},
 
-	{Hint: token.RegisterTokenHint, Instance: token.RegisterToken{}},
-	{Hint: token.MintHint, Instance: token.Mint{}},
-	{Hint: token.BurnHint, Instance: token.Burn{}},
-	{Hint: token.ApproveHint, Instance: token.Approve{}},
-	{Hint: token.TransferHint, Instance: token.Transfer{}},
-	{Hint: token.TransferFromHint, Instance: token.TransferFrom{}},
+	{Hint: point.RegisterPointHint, Instance: point.RegisterPoint{}},
+	{Hint: point.MintHint, Instance: point.Mint{}},
+	{Hint: point.BurnHint, Instance: point.Burn{}},
+	{Hint: point.ApproveHint, Instance: point.Approve{}},
+	{Hint: point.TransferHint, Instance: point.Transfer{}},
+	{Hint: point.TransferFromHint, Instance: point.TransferFrom{}},
 }
 
 var AddedSupportedHinters = []encoder.DecodeDetail{
-	{Hint: token.RegisterTokenFactHint, Instance: token.RegisterTokenFact{}},
-	{Hint: token.MintFactHint, Instance: token.MintFact{}},
-	{Hint: token.BurnFactHint, Instance: token.BurnFact{}},
-	{Hint: token.ApproveFactHint, Instance: token.ApproveFact{}},
-	{Hint: token.TransferFactHint, Instance: token.TransferFact{}},
-	{Hint: token.TransferFromFactHint, Instance: token.TransferFromFact{}},
+	{Hint: point.RegisterPointFactHint, Instance: point.RegisterPointFact{}},
+	{Hint: point.MintFactHint, Instance: point.MintFact{}},
+	{Hint: point.BurnFactHint, Instance: point.BurnFact{}},
+	{Hint: point.ApproveFactHint, Instance: point.ApproveFact{}},
+	{Hint: point.TransferFactHint, Instance: point.TransferFact{}},
+	{Hint: point.TransferFromFactHint, Instance: point.TransferFromFact{}},
 }
 
 func init() {

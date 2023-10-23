@@ -1,23 +1,23 @@
-### mitum-token
+### mitum-point
 
-*mitum-token* is a [mitum](https://github.com/ProtoconNet/mitum2)-based contract model and is a service that provides mint functions.
+*mitum-point* is a [mitum](https://github.com/ProtoconNet/mitum2)-based contract model and is a service that provides mint functions.
 
 #### Installation
 
 ```sh
-$ git clone https://github.com/ProtoconNet/mitum-token
+$ git clone https://github.com/ProtoconNet/mitum-point
 
-$ cd mitum-token
+$ cd mitum-point
 
-$ go build -o ./mt ./main.go
+$ go build -o ./mp ./main.go
 ```
 
 #### Run
 
 ```sh
-$ ./mt init --design=<config file> <genesis config file>
+$ ./mp init --design=<config file> <genesis config file>
 
-$ ./mt run --design=<config file>
+$ ./mp run --design=<config file>
 ```
 
 [standalong.yml](standalone.yml) is a sample of `config file`.

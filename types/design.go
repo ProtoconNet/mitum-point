@@ -2,13 +2,13 @@ package types
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	"github.com/ProtoconNet/mitum-token/utils"
+	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/pkg/errors"
 )
 
-var DesignHint = hint.MustNewHint("mitum-token-design-v0.0.1")
+var DesignHint = hint.MustNewHint("mitum-point-design-v0.0.1")
 
 type Design struct {
 	hint.BaseHinter

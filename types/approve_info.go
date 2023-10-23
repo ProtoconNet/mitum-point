@@ -2,13 +2,13 @@ package types
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	"github.com/ProtoconNet/mitum-token/utils"
+	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-var ApproveInfoHint = hint.MustNewHint("mitum-token-approve-info-v0.0.1")
+var ApproveInfoHint = hint.MustNewHint("mitum-point-approve-info-v0.0.1")
 
 type ApproveInfo struct {
 	hint.BaseHinter

@@ -2,10 +2,10 @@ package cmds
 
 import (
 	"context"
+	"github.com/ProtoconNet/mitum-point/operation/point"
 
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
-	"github.com/ProtoconNet/mitum-token/operation/token"
-	"github.com/ProtoconNet/mitum-token/utils"
+	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/pkg/errors"
 
 	"github.com/ProtoconNet/mitum2/base"
@@ -14,7 +14,7 @@ import (
 
 type MintCommand struct {
 	OperationCommand
-	Receiver currencycmds.AddressFlag `arg:"" name:"receiver" help:"token receiver" required:"true"`
+	Receiver currencycmds.AddressFlag `arg:"" name:"receiver" help:"point receiver" required:"true"`
 	Amount   currencycmds.BigFlag     `arg:"" name:"amount" help:"amount to mint" required:"true"`
 	receiver base.Address
 }
@@ -58,7 +58,7 @@ func (cmd *MintCommand) parseFlags() error {
 func (cmd *MintCommand) createOperation() (base.Operation, error) { // nolint:dupl}
 	e := util.StringError(utils.ErrStringCreate("mint operation"))
 
-	fact := token.NewMintFact(
+	fact := point.NewMintFact(
 		[]byte(cmd.Token),
 		cmd.sender, cmd.contract,
 		cmd.Currency.CID,
@@ -66,7 +66,7 @@ func (cmd *MintCommand) createOperation() (base.Operation, error) { // nolint:du
 		cmd.Amount.Big,
 	)
 
-	op := token.NewMint(fact)
+	op := point.NewMint(fact)
 	if err := op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID()); err != nil {
 		return nil, e.Wrap(err)
 	}

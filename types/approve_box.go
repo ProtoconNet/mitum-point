@@ -1,14 +1,14 @@
 package types
 
 import (
-	"github.com/ProtoconNet/mitum-token/utils"
+	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/pkg/errors"
 )
 
-var ApproveBoxHint = hint.MustNewHint("mitum-token-approve-box-v0.0.1")
+var ApproveBoxHint = hint.MustNewHint("mitum-point-approve-box-v0.0.1")
 
 type ApproveBox struct {
 	hint.BaseHinter

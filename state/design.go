@@ -3,8 +3,8 @@ package state
 import (
 	"fmt"
 
-	"github.com/ProtoconNet/mitum-token/types"
-	"github.com/ProtoconNet/mitum-token/utils"
+	"github.com/ProtoconNet/mitum-point/types"
+	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	DesignStateValueHint = hint.MustNewHint("mitum-token-design-state-value-v0.0.1")
+	DesignStateValueHint = hint.MustNewHint("mitum-point-design-state-value-v0.0.1")
 	DesignSuffix         = ":design"
 )
 
@@ -67,5 +67,5 @@ func StateDesignValue(st base.State) (*types.Design, error) {
 }
 
 func StateKeyDesign(contract base.Address) string {
-	return fmt.Sprintf("%s%s", StateKeyTokenPrefix(contract), DesignSuffix)
+	return fmt.Sprintf("%s%s", StateKeyPointPrefix(contract), DesignSuffix)
 }

@@ -2,10 +2,10 @@ package cmds
 
 import (
 	"context"
+	"github.com/ProtoconNet/mitum-point/operation/point"
 
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
-	"github.com/ProtoconNet/mitum-token/operation/token"
-	"github.com/ProtoconNet/mitum-token/utils"
+	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/pkg/errors"
 
 	"github.com/ProtoconNet/mitum2/base"
@@ -14,7 +14,7 @@ import (
 
 type TransferCommand struct {
 	OperationCommand
-	Receiver currencycmds.AddressFlag `arg:"" name:"receiver" help:"token receiver" required:"true"`
+	Receiver currencycmds.AddressFlag `arg:"" name:"receiver" help:"point receiver" required:"true"`
 	Amount   currencycmds.BigFlag     `arg:"" name:"amount" help:"amount to transfer" required:"true"`
 	receiver base.Address
 }
@@ -58,7 +58,7 @@ func (cmd *TransferCommand) parseFlags() error {
 func (cmd *TransferCommand) createOperation() (base.Operation, error) { // nolint:dupl}
 	e := util.StringError(utils.ErrStringCreate("transfer operation"))
 
-	fact := token.NewTransferFact(
+	fact := point.NewTransferFact(
 		[]byte(cmd.Token),
 		cmd.sender, cmd.contract,
 		cmd.Currency.CID,
@@ -66,7 +66,7 @@ func (cmd *TransferCommand) createOperation() (base.Operation, error) { // nolin
 		cmd.Amount.Big,
 	)
 
-	op := token.NewTransfer(fact)
+	op := point.NewTransfer(fact)
 	if err := op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID()); err != nil {
 		return nil, e.Wrap(err)
 	}

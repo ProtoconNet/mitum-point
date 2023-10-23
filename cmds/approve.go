@@ -2,10 +2,10 @@ package cmds
 
 import (
 	"context"
+	"github.com/ProtoconNet/mitum-point/operation/point"
 
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
-	"github.com/ProtoconNet/mitum-token/operation/token"
-	"github.com/ProtoconNet/mitum-token/utils"
+	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/pkg/errors"
 
 	"github.com/ProtoconNet/mitum2/base"
@@ -58,7 +58,7 @@ func (cmd *ApproveCommand) parseFlags() error {
 func (cmd *ApproveCommand) createOperation() (base.Operation, error) { // nolint:dupl}
 	e := util.StringError(utils.ErrStringCreate("approve operation"))
 
-	fact := token.NewApproveFact(
+	fact := point.NewApproveFact(
 		[]byte(cmd.Token),
 		cmd.sender, cmd.contract,
 		cmd.Currency.CID,
@@ -66,7 +66,7 @@ func (cmd *ApproveCommand) createOperation() (base.Operation, error) { // nolint
 		cmd.Amount.Big,
 	)
 
-	op := token.NewApprove(fact)
+	op := point.NewApprove(fact)
 	if err := op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID()); err != nil {
 		return nil, e.Wrap(err)
 	}
