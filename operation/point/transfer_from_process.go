@@ -48,7 +48,7 @@ func NewTransferFromProcessor() currencytypes.GetNewProcessor {
 		nopp := transferFromProcessorPool.Get()
 		opp, ok := nopp.(*TransferFromProcessor)
 		if !ok {
-			return nil, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(t, nopp)))
+			return nil, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(&t, nopp)))
 		}
 
 		b, err := base.NewBaseOperationProcessor(
@@ -98,7 +98,7 @@ func (opp *TransferFromProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckNotExistsState(extstate.StateKeyContractAccount(fact.Receiver()), getStateFunc); err != nil {
-		return nil, ErrBaseOperationProcess(err, "contract account cannot receive tokens, %s", fact.Receiver().String()), nil
+		return nil, ErrBaseOperationProcess(err, "contract account cannot receive points, %s", fact.Receiver().String()), nil
 	}
 
 	if err := currencystate.CheckExistsState(currency.StateKeyAccount(fact.Target()), getStateFunc); err != nil {
@@ -248,7 +248,7 @@ func (opp *TransferFromProcessor) Process(
 		state.NewDesignStateValue(de),
 	)
 
-	st, err = currencystate.ExistsState(g.PointBalance(fact.Sender()), "key of point balance", getStateFunc)
+	st, err = currencystate.ExistsState(g.PointBalance(fact.Target()), "key of point balance", getStateFunc)
 	if err != nil {
 		return nil, ErrStateNotFound("point balance", utils.JoinStringers(fact.Contract(), fact.Target()), err), nil
 	}
