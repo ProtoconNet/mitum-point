@@ -42,21 +42,21 @@ func (bs *BlockSession) preparePoint() error {
 }
 
 func (bs *BlockSession) handlePointState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	if tokenDoc, err := NewPointDoc(st, bs.st.DatabaseEncoder()); err != nil {
+	if pointDoc, err := NewPointDoc(st, bs.st.DatabaseEncoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
-			mongo.NewInsertOneModel().SetDocument(tokenDoc),
+			mongo.NewInsertOneModel().SetDocument(pointDoc),
 		}, nil
 	}
 }
 
 func (bs *BlockSession) handlePointBalanceState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	if tokenBalanceDoc, err := NewBalanceDoc(st, bs.st.DatabaseEncoder()); err != nil {
+	if pointBalanceDoc, err := NewBalanceDoc(st, bs.st.DatabaseEncoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
-			mongo.NewInsertOneModel().SetDocument(tokenBalanceDoc),
+			mongo.NewInsertOneModel().SetDocument(pointBalanceDoc),
 		}, nil
 	}
 }

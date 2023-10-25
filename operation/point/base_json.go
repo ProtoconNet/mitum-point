@@ -24,7 +24,7 @@ func (fact PointFact) MarshalJSON() ([]byte, error) {
 	})
 }
 
-type TokenFactJSONUnmarshaler struct {
+type PointFactJSONUnmarshaler struct {
 	base.BaseFactJSONUnmarshaler
 	Sender   string `json:"sender"`
 	Contract string `json:"contract"`
@@ -34,7 +34,7 @@ type TokenFactJSONUnmarshaler struct {
 func (fact *PointFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	e := util.StringError(utils.ErrStringDecodeJSON(*fact))
 
-	var uf TokenFactJSONUnmarshaler
+	var uf PointFactJSONUnmarshaler
 	if err := enc.Unmarshal(b, &uf); err != nil {
 		return e.Wrap(err)
 	}

@@ -48,7 +48,7 @@ func NewMintProcessor() currencytypes.GetNewProcessor {
 		nopp := mintProcessorPool.Get()
 		opp, ok := nopp.(*MintProcessor)
 		if !ok {
-			return nil, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(t, nopp)))
+			return nil, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(&t, nopp)))
 		}
 
 		b, err := base.NewBaseOperationProcessor(
@@ -108,7 +108,7 @@ func (opp *MintProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckNotExistsState(extstate.StateKeyContractAccount(fact.Receiver()), getStateFunc); err != nil {
-		return nil, ErrBaseOperationProcess(err, "contract account cannot receive new tokens, %s", fact.Receiver().String()), nil
+		return nil, ErrBaseOperationProcess(err, "contract account cannot receive new points, %s", fact.Receiver().String()), nil
 	}
 
 	g := state.NewStateKeyGenerator(fact.Contract())

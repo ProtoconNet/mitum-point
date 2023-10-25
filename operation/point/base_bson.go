@@ -35,7 +35,7 @@ func (fact PointFact) MarshalBSON() ([]byte, error) {
 	)
 }
 
-type TokenFactBSONUnmarshaler struct {
+type PointFactBSONUnmarshaler struct {
 	Hint     string `bson:"_hint"`
 	Sender   string `bson:"sender"`
 	Contract string `bson:"contract"`
@@ -54,7 +54,7 @@ func (fact *PointFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	fact.BaseFact.SetHash(valuehash.NewBytesFromString(ubf.Hash))
 	fact.BaseFact.SetToken(ubf.Token)
 
-	var uf TokenFactBSONUnmarshaler
+	var uf PointFactBSONUnmarshaler
 	if err := bson.Unmarshal(b, &uf); err != nil {
 		return e.Wrap(err)
 	}
@@ -71,26 +71,3 @@ func (fact *PointFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		uf.Currency,
 	)
 }
-
-//func (op TokenOperation) MarshalBSON() ([]byte, error) {
-//	return bsonenc.Marshal(
-//		bson.M{
-//			"_hint": op.Hint().String(),
-//			"hash":  op.Hash().String(),
-//			"fact":  op.Fact(),
-//			"signs": op.Signs(),
-//		})
-//}
-//
-//func (op *TokenOperation) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-//	e := util.StringError(utils.ErrStringDecodeBSON(*op))
-//
-//	var ubo common.BaseOperation
-//	if err := ubo.DecodeBSON(b, enc); err != nil {
-//		return e.Wrap(err)
-//	}
-//
-//	op.BaseOperation = ubo
-//
-//	return nil
-//}

@@ -47,7 +47,7 @@ func NewBurnProcessor() currencytypes.GetNewProcessor {
 		nopp := burnProcessorPool.Get()
 		opp, ok := nopp.(*BurnProcessor)
 		if !ok {
-			return nil, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(t, nopp)))
+			return nil, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(&t, nopp)))
 		}
 
 		b, err := base.NewBaseOperationProcessor(
@@ -102,7 +102,7 @@ func (opp *BurnProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckNotExistsState(extstate.StateKeyContractAccount(fact.Target()), getStateFunc); err != nil {
-		return nil, ErrBaseOperationProcess(err, "burning tokens of contract accounts is impossible, %s", fact.Target().String()), nil
+		return nil, ErrBaseOperationProcess(err, "contract account don't have point, %s", fact.Target().String()), nil
 	}
 
 	g := state.NewStateKeyGenerator(fact.Contract())

@@ -18,7 +18,7 @@ func (s PointBalanceStateValue) MarshalBSON() ([]byte, error) {
 	)
 }
 
-type TokenBalanceStateValueBSONUnmarshaler struct {
+type PointBalanceStateValueBSONUnmarshaler struct {
 	Hint   string `bson:"_hint"`
 	Amount string `bson:"amount"`
 }
@@ -26,7 +26,7 @@ type TokenBalanceStateValueBSONUnmarshaler struct {
 func (s *PointBalanceStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	e := util.StringError(utils.ErrStringDecodeBSON(*s))
 
-	var u TokenBalanceStateValueBSONUnmarshaler
+	var u PointBalanceStateValueBSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
 		return e.Wrap(err)
 	}

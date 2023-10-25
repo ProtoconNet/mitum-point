@@ -8,26 +8,26 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-type TokenBalanceStateValueJSONMarshaler struct {
+type PointBalanceStateValueJSONMarshaler struct {
 	hint.BaseHinter
 	Amount common.Big `json:"amount"`
 }
 
 func (s PointBalanceStateValue) MarshalJSON() ([]byte, error) {
-	return util.MarshalJSON(TokenBalanceStateValueJSONMarshaler{
+	return util.MarshalJSON(PointBalanceStateValueJSONMarshaler{
 		BaseHinter: s.BaseHinter,
 		Amount:     s.amount,
 	})
 }
 
-type TokenBalanceStateValueJSONUnmarshaler struct {
+type PointBalanceStateValueJSONUnmarshaler struct {
 	Amount string `json:"amount"`
 }
 
 func (s *PointBalanceStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	e := util.StringError(utils.ErrStringDecodeJSON(*s))
 
-	var u TokenBalanceStateValueJSONUnmarshaler
+	var u PointBalanceStateValueJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
 		return e.Wrap(err)
 	}

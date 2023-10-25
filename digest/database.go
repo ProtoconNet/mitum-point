@@ -7,6 +7,7 @@ import (
 	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum-point/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
+	mitumutil "github.com/ProtoconNet/mitum2/util"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -46,7 +47,7 @@ func Point(st *currencydigest.Database, contract string) (*types.Design, error) 
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return nil, err
+		return nil, mitumutil.ErrNotFound.Errorf("point design, contract %s", contract)
 	}
 
 	return design, nil
@@ -77,7 +78,7 @@ func PointBalance(st *currencydigest.Database, contract, account string) (common
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return common.NilBig, err
+		return common.NilBig, mitumutil.ErrNotFound.Errorf("point balance by contract %s, account %s", contract, account)
 	}
 
 	return amount, nil

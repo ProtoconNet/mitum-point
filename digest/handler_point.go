@@ -108,7 +108,7 @@ func (hd *Handlers) handlePointBalanceInGroup(contract, account string) (interfa
 }
 
 func (hd *Handlers) buildPointBalanceHal(contract, account string, amount common.Big) (currencydigest.Hal, error) {
-	h, err := hd.combineURL(HandlerPathPoint, "contract", contract, "address", account)
+	h, err := hd.combineURL(HandlerPathPointBalance, "contract", contract, "address", account)
 	if err != nil {
 		return nil, err
 	}
