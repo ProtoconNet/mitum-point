@@ -8,10 +8,10 @@ import (
 	"github.com/ProtoconNet/mitum2/base"
 )
 
-var PointPrefix = "point:"
+var PointPrefix = "point"
 
 func StateKeyPointPrefix(contract base.Address) string {
-	return fmt.Sprintf("%s%s", PointPrefix, contract)
+	return fmt.Sprintf("%s:%s", PointPrefix, contract)
 }
 
 type StateKeyGenerator struct {
@@ -32,13 +32,13 @@ func (g StateKeyGenerator) PointBalance(address base.Address) string {
 	return StateKeyPointBalance(g.contract, address)
 }
 
-func ParseStateKey(key string, Prefix string) ([]string, error) {
+func ParseStateKey(key string, Prefix string, expected int) ([]string, error) {
 	parsedKey := strings.Split(key, ":")
 	if parsedKey[0] != Prefix[:len(Prefix)-1] {
 		return nil, errors.Errorf("State Key not include Prefix, %s", parsedKey)
 	}
-	if len(parsedKey) < 3 {
-		return nil, errors.Errorf("parsing State Key string failed, %s", parsedKey)
+	if len(parsedKey) < expected {
+		return nil, errors.Errorf("parsed State Key length under %v", expected)
 	} else {
 		return parsedKey, nil
 	}

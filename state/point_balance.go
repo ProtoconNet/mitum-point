@@ -13,7 +13,7 @@ import (
 
 var (
 	PointBalanceStateValueHint = hint.MustNewHint("mitum-point-balance-state-value-v0.0.1")
-	PointBalanceSuffix         = ":pointbalance"
+	PointBalanceSuffix         = "pointbalance"
 )
 
 type PointBalanceStateValue struct {
@@ -67,5 +67,5 @@ func StatePointBalanceValue(st base.State) (common.Big, error) {
 }
 
 func StateKeyPointBalance(contract base.Address, address base.Address) string {
-	return fmt.Sprintf("%s:%s%s", StateKeyPointPrefix(contract), address, PointBalanceSuffix)
+	return fmt.Sprintf("%s:%s:%s", StateKeyPointPrefix(contract), address, PointBalanceSuffix)
 }
