@@ -85,6 +85,16 @@ func (fact BurnFact) Amount() common.Big {
 	return fact.amount
 }
 
+func (fact BurnFact) Addresses() ([]base.Address, error) {
+	var as []base.Address
+
+	as = append(as, fact.PointFact.Sender())
+	as = append(as, fact.PointFact.Contract())
+	as = append(as, fact.target)
+
+	return as, nil
+}
+
 type Burn struct {
 	common.BaseOperation
 }

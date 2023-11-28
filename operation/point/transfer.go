@@ -85,6 +85,16 @@ func (fact TransferFact) Amount() common.Big {
 	return fact.amount
 }
 
+func (fact TransferFact) Addresses() ([]base.Address, error) {
+	var as []base.Address
+
+	as = append(as, fact.PointFact.Sender())
+	as = append(as, fact.PointFact.Contract())
+	as = append(as, fact.receiver)
+
+	return as, nil
+}
+
 type Transfer struct {
 	common.BaseOperation
 }

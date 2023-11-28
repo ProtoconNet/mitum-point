@@ -89,6 +89,16 @@ func (fact ApproveFact) Amount() common.Big {
 	return fact.amount
 }
 
+func (fact ApproveFact) Addresses() ([]base.Address, error) {
+	var as []base.Address
+
+	as = append(as, fact.PointFact.Sender())
+	as = append(as, fact.PointFact.Contract())
+	as = append(as, fact.approved)
+
+	return as, nil
+}
+
 type Approve struct {
 	common.BaseOperation
 }
