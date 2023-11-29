@@ -4,6 +4,7 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	mongodbstorage "github.com/ProtoconNet/mitum-currency/v3/digest/mongodb"
 	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
+	crcystate "github.com/ProtoconNet/mitum-currency/v3/state"
 	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum2/base"
@@ -39,7 +40,7 @@ func (doc PointDoc) MarshalBSON() ([]byte, error) {
 		return nil, err
 	}
 
-	stateKeys, err := state.ParseStateKey(doc.st.Key(), state.PointPrefix, 3)
+	stateKeys, err := crcystate.ParseStateKey(doc.st.Key(), state.PointPrefix, 3)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +81,7 @@ func (doc PointBalanceDoc) MarshalBSON() ([]byte, error) {
 		return nil, err
 	}
 
-	stateKeys, err := state.ParseStateKey(doc.st.Key(), state.PointPrefix, 4)
+	stateKeys, err := crcystate.ParseStateKey(doc.st.Key(), state.PointPrefix, 4)
 	if err != nil {
 		return nil, err
 	}
