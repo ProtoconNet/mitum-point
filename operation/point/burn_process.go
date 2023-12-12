@@ -148,13 +148,13 @@ func (opp *BurnProcessor) Process(
 
 	g := state.NewStateKeyGenerator(fact.Contract())
 
-	sts := make([]base.StateMergeValue, 3)
+	var sts []base.StateMergeValue
 
 	v, baseErr, err := calculateCurrencyFee(fact.PointFact, getStateFunc)
 	if baseErr != nil || err != nil {
 		return nil, baseErr, err
 	}
-	sts[0] = v
+	sts = append(sts, v...)
 
 	st, err := currencystate.ExistsState(g.Design(), "key of design", getStateFunc)
 	if err != nil {
@@ -179,10 +179,10 @@ func (opp *BurnProcessor) Process(
 		return nil, ErrInvalid(de, err), nil
 	}
 
-	sts[1] = currencystate.NewStateMergeValue(
+	sts = append(sts, currencystate.NewStateMergeValue(
 		g.Design(),
 		state.NewDesignStateValue(de),
-	)
+	))
 
 	st, err = currencystate.ExistsState(g.PointBalance(fact.Target()), "key of point balance", getStateFunc)
 	if err != nil {
@@ -194,10 +194,10 @@ func (opp *BurnProcessor) Process(
 		return nil, ErrBaseOperationProcess(err, "point balance value not found, %s, %s", fact.Contract(), fact.Target()), nil
 	}
 
-	sts[2] = currencystate.NewStateMergeValue(
+	sts = append(sts, currencystate.NewStateMergeValue(
 		g.PointBalance(fact.Target()),
 		state.NewPointBalanceStateValue(tb.Sub(fact.Amount())),
-	)
+	))
 
 	return sts, nil, nil
 }
