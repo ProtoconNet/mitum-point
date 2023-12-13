@@ -150,7 +150,9 @@ func (opp *TransferProcessor) Process(
 	if baseErr != nil || err != nil {
 		return nil, baseErr, err
 	}
-	sts = append(sts, v...)
+	if len(v) > 0 {
+		sts = append(sts, v...)
+	}
 
 	st, err := currencystate.ExistsState(g.PointBalance(fact.Sender()), "key of point balance", getStateFunc)
 	if err != nil {
