@@ -6,12 +6,11 @@ import (
 
 	"github.com/ProtoconNet/mitum2/launch"
 	"github.com/ProtoconNet/mitum2/util/encoder"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
 )
 
 var (
 	encs *encoder.Encoders
-	enc  *jsonenc.Encoder
+	enc  encoder.Encoder
 )
 
 func init() {
@@ -28,8 +27,8 @@ func init() {
 		panic(err)
 	}
 
-	pctx = context.WithValue(pctx, launch.LoggingContextKey, log) //revive:disable-line:modifies-parameter
-	pctx = context.WithValue(pctx, launch.LogOutContextKey, logout)
+	pctx = context.WithValue(pctx, launch.LoggingContextKey, log)   //revive:disable-line:modifies-parameter
+	pctx = context.WithValue(pctx, launch.LogOutContextKey, logout) //revive:disable-line:modifies-parameter
 
 	cmd := BaseCommand{
 		Out: os.Stdout,
