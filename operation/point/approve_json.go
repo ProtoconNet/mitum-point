@@ -5,7 +5,7 @@ import (
 	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type ApproveFactJSONMarshaler struct {
@@ -27,7 +27,7 @@ type ApproveFactJSONUnMarshaler struct {
 	Amount   string `json:"amount"`
 }
 
-func (fact *ApproveFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (fact *ApproveFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError(utils.ErrStringDecodeJSON(*fact))
 
 	if err := fact.PointFact.DecodeJSON(b, enc); err != nil {

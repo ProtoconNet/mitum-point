@@ -5,7 +5,7 @@ import (
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/util"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type RegisterPointFactJSONMarshaler struct {
@@ -30,7 +30,7 @@ type RegisterPointFactJSONUnMarshaler struct {
 	InitialSupply string `json:"initial_supply"`
 }
 
-func (fact *RegisterPointFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (fact *RegisterPointFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError(utils.ErrStringDecodeJSON(*fact))
 
 	if err := fact.PointFact.DecodeJSON(b, enc); err != nil {
