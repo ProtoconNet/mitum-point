@@ -102,53 +102,57 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 		_ = bs.close()
 	}()
 
-	if err := bs.writeModels(ctx, defaultColNameBlock, bs.blockModels); err != nil {
-		return err
-	}
-
-	if len(bs.operationModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameOperation, bs.operationModels); err != nil {
-			return err
+	_, err := bs.st.DatabaseClient().WithSession(func(txnCtx mongo.SessionContext, collection func(string) *mongo.Collection) (interface{}, error) {
+		if err := bs.writeModels(txnCtx, defaultColNameBlock, bs.blockModels); err != nil {
+			return nil, err
 		}
-	}
 
-	if len(bs.currencyModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameCurrency, bs.currencyModels); err != nil {
-			return err
+		if len(bs.operationModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameOperation, bs.operationModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.accountModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameAccount, bs.accountModels); err != nil {
-			return err
+		if len(bs.currencyModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameCurrency, bs.currencyModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.contractAccountModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameContractAccount, bs.contractAccountModels); err != nil {
-			return err
+		if len(bs.accountModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameAccount, bs.accountModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.balanceModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameBalance, bs.balanceModels); err != nil {
-			return err
+		if len(bs.contractAccountModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameContractAccount, bs.contractAccountModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.pointModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNamePoint, bs.pointModels); err != nil {
-			return err
+		if len(bs.balanceModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameBalance, bs.balanceModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.pointBalanceModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNamePointBalance, bs.pointBalanceModels); err != nil {
-			return err
+		if len(bs.pointModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNamePoint, bs.pointModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	return nil
+		if len(bs.pointBalanceModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNamePointBalance, bs.pointBalanceModels); err != nil {
+				return nil, err
+			}
+		}
+
+		return nil, nil
+	})
+
+	return err
 }
 
 func (bs *BlockSession) Close() error {
