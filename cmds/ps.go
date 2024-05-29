@@ -38,16 +38,16 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		return pctx, err
 	}
 
-	err := opr.SetCheckDuplicationFunc(processor.CheckDuplication)
-	if err != nil {
-		return pctx, err
-	}
-	err = opr.SetGetNewProcessorFunc(processor.GetNewProcessor)
+	//err := opr.SetCheckDuplicationFunc(processor.CheckDuplication)
+	//if err != nil {
+	//	return pctx, err
+	//}
+	err := opr.SetGetNewProcessorFunc(processor.GetNewProcessor)
 	if err != nil {
 		return pctx, err
 	}
 
-	ps := []processorInfo{
+	pcs := []processorInfo{
 		{point.RegisterPointHint, point.NewRegisterPointProcessor()},
 		{point.MintHint, point.NewMintProcessor()},
 		{point.BurnHint, point.NewBurnProcessor()},
@@ -56,7 +56,7 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		{point.TransferFromHint, point.NewTransferFromProcessor()},
 	}
 
-	for _, p := range ps {
+	for _, p := range pcs {
 		if err := opr.SetProcessor(p.hint, p.processor); err != nil {
 			return pctx, err
 		}
