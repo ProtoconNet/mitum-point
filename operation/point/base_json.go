@@ -1,8 +1,8 @@
 package point
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -32,20 +32,18 @@ type PointFactJSONUnmarshaler struct {
 }
 
 func (fact *PointFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError(utils.ErrStringDecodeJSON(*fact))
-
 	var uf PointFactJSONUnmarshaler
 	if err := enc.Unmarshal(b, &uf); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
 	fact.BaseFact.SetJSONUnmarshaler(uf.BaseFactJSONUnmarshaler)
 
-	return fact.unpack(enc,
-		uf.Sender,
-		uf.Contract,
-		uf.Currency,
-	)
+	if err := fact.unpack(enc, uf.Sender, uf.Contract, uf.Currency); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
+	}
+
+	return nil
 }
 
 func (fact PointFact) JSONMarshaler() PointFactJSONMarshaler {

@@ -10,7 +10,6 @@ import (
 	"github.com/ProtoconNet/mitum-point/utils"
 
 	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
-	"github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	extstate "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-point/state"
@@ -66,61 +65,81 @@ func NewRegisterPointProcessor() currencytypes.GetNewProcessor {
 func (opp *RegisterPointProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
-	e := util.StringError(ErrStringPreProcess(*opp))
-
 	fact, ok := op.Fact().(RegisterPointFact)
 	if !ok {
-		return ctx, nil, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(RegisterPointFact{}, op.Fact())))
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMTypeMismatch).
+				Errorf("expected %T, not %T", RegisterPointFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
-		return ctx, nil, e.Wrap(err)
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", err)), nil
 	}
 
-	if err := currencystate.CheckExistsState(currency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, ErrStateNotFound("sender", fact.Sender().String(), err), nil
-	}
-
-	if err := currencystate.CheckNotExistsState(extstate.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, ErrBaseOperationProcess(err, "contract account cannot register point, %s", fact.Sender().String()), nil
-	}
-
-	st, err := currencystate.ExistsState(extstate.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
+	_, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {
-		return nil, ErrStateNotFound("contract", fact.Contract().String(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("%v: %v", fact.Currency(), err)), nil
 	}
 
-	ca, err := extstate.StateContractAccountValue(st)
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", aErr)), nil
+	} else if cErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
+				Errorf("%v: sender account is contract account, %v", fact.Sender(), cErr)), nil
+	}
+
+	_, cSt, aErr, cErr := currencystate.ExistsCAccount(fact.Contract(), "contract", true, true, getStateFunc)
+	if aErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", aErr)), nil
+	} else if cErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", cErr)), nil
+	}
+
+	ca, err := extstate.CheckCAAuthFromState(cSt, fact.Sender())
 	if err != nil {
-		return nil, ErrStateNotFound("contract value", fact.Contract().String(), err), nil
-	}
-
-	if !(ca.Owner().Equal(fact.sender) || ca.IsOperator(fact.Sender())) {
-		return nil, ErrBaseOperationProcess(nil, "sender is neither the owner nor the operator of the target contract account, %q", fact.sender), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", err)), nil
 	}
 
 	if ca.IsActive() {
-		return nil, ErrBaseOperationProcess(nil, "a design is already registered, %s", fact.Contract().String()), nil
-	}
-
-	if err := currencystate.CheckExistsState(currency.StateKeyCurrencyDesign(fact.Currency()), getStateFunc); err != nil {
-		return nil, ErrStateNotFound("currency", fact.Currency().String(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMServiceE).Errorf("point design, %v", fact.Contract())), nil
 	}
 
 	g := state.NewStateKeyGenerator(fact.Contract())
 
-	if err := currencystate.CheckNotExistsState(g.Design(), getStateFunc); err != nil {
-		return nil, ErrStateAlreadyExists("point design", fact.Contract().String(), err), nil
+	if found, _ := currencystate.CheckNotExistsState(g.Design(), getStateFunc); found {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMServiceE).Errorf("point design, %v", fact.Contract())), nil
 	}
 
 	if fact.InitialSupply().OverZero() {
-		if err := currencystate.CheckNotExistsState(g.PointBalance(ca.Owner()), getStateFunc); err != nil {
-			return nil, ErrStateAlreadyExists("point balance", utils.JoinStringers(fact.Contract(), ca.Owner()), err), nil
+		if found, _ := currencystate.CheckNotExistsState(g.PointBalance(ca.Owner()), getStateFunc); found {
+			return ctx, base.NewBaseOperationProcessReasonError(
+				common.ErrMPreProcess.
+					Wrap(common.ErrMServiceE).Errorf("point balance, %v", fact.Contract())), nil
 		}
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, ErrBaseOperationProcess(err, "invalid signing"), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMSignInvalid).
+				Errorf("%v", err)), nil
 	}
 
 	return ctx, nil, nil
