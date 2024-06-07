@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 
-	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -12,9 +11,9 @@ import (
 
 type DesignJSONMarshaler struct {
 	hint.BaseHinter
-	Symbol types.CurrencyID `json:"symbol"`
-	Name   string           `json:"name"`
-	Policy Policy           `json:"policy"`
+	Symbol PointID `json:"symbol"`
+	Name   string  `json:"name"`
+	Policy Policy  `json:"policy"`
 }
 
 func (d Design) MarshalJSON() ([]byte, error) {

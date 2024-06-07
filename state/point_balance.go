@@ -18,13 +18,13 @@ var (
 
 type PointBalanceStateValue struct {
 	hint.BaseHinter
-	amount common.Big
+	Amount common.Big
 }
 
 func NewPointBalanceStateValue(amount common.Big) PointBalanceStateValue {
 	return PointBalanceStateValue{
 		BaseHinter: hint.NewBaseHinter(PointBalanceStateValueHint),
-		amount:     amount,
+		Amount:     amount,
 	}
 }
 
@@ -39,7 +39,7 @@ func (s PointBalanceStateValue) IsValid([]byte) error {
 		return e.Wrap(err)
 	}
 
-	if !s.amount.OverNil() {
+	if !s.Amount.OverNil() {
 		return e.Wrap(errors.Errorf("nil big"))
 	}
 
@@ -47,7 +47,7 @@ func (s PointBalanceStateValue) IsValid([]byte) error {
 }
 
 func (s PointBalanceStateValue) HashBytes() []byte {
-	return s.amount.Bytes()
+	return s.Amount.Bytes()
 }
 
 func StatePointBalanceValue(st base.State) (common.Big, error) {
@@ -63,7 +63,55 @@ func StatePointBalanceValue(st base.State) (common.Big, error) {
 		return common.NilBig, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(PointBalanceStateValue{}, v)))
 	}
 
-	return s.amount, nil
+	return s.Amount, nil
+}
+
+type AddPointBalanceStateValue struct {
+	Amount common.Big
+}
+
+func NewAddPointBalanceStateValue(amount common.Big) AddPointBalanceStateValue {
+	return AddPointBalanceStateValue{
+		Amount: amount,
+	}
+}
+
+func (b AddPointBalanceStateValue) IsValid([]byte) error {
+	e := util.ErrInvalid.Errorf("invalid AddPointBalanceStateValue")
+
+	if err := util.CheckIsValiders(nil, false, b.Amount); err != nil {
+		return e.Wrap(err)
+	}
+
+	return nil
+}
+
+func (b AddPointBalanceStateValue) HashBytes() []byte {
+	return b.Amount.Bytes()
+}
+
+type DeductPointBalanceStateValue struct {
+	Amount common.Big
+}
+
+func NewDeductPointBalanceStateValue(amount common.Big) DeductPointBalanceStateValue {
+	return DeductPointBalanceStateValue{
+		Amount: amount,
+	}
+}
+
+func (b DeductPointBalanceStateValue) IsValid([]byte) error {
+	e := util.ErrInvalid.Errorf("invalid DeductPointBalanceStateValue")
+
+	if err := util.CheckIsValiders(nil, false, b.Amount); err != nil {
+		return e.Wrap(err)
+	}
+
+	return nil
+}
+
+func (b DeductPointBalanceStateValue) HashBytes() []byte {
+	return b.Amount.Bytes()
 }
 
 func StateKeyPointBalance(contract base.Address, address base.Address) string {

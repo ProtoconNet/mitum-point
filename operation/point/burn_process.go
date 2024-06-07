@@ -3,6 +3,7 @@ package point
 import (
 	"context"
 	"fmt"
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"sync"
 
 	"github.com/ProtoconNet/mitum-point/types"
@@ -191,14 +192,17 @@ func (opp *BurnProcessor) Process(
 		return nil, ErrBaseOperationProcess(err, "point balance not found, %s, %s", fact.Contract(), fact.Target()), nil
 	}
 
-	tb, err := state.StatePointBalanceValue(st)
+	_, err = state.StatePointBalanceValue(st)
 	if err != nil {
 		return nil, ErrBaseOperationProcess(err, "point balance value not found, %s, %s", fact.Contract(), fact.Target()), nil
 	}
 
-	sts = append(sts, currencystate.NewStateMergeValue(
+	sts = append(sts, common.NewBaseStateMergeValue(
 		g.PointBalance(fact.Target()),
-		state.NewPointBalanceStateValue(tb.Sub(fact.Amount())),
+		state.NewDeductPointBalanceStateValue(fact.Amount()),
+		func(height base.Height, st base.State) base.StateValueMerger {
+			return state.NewPointBalanceStateValueMerger(height, g.PointBalance(fact.Target()), st)
+		},
 	))
 
 	return sts, nil, nil

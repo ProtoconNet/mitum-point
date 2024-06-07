@@ -3,6 +3,7 @@ package point
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -18,7 +19,7 @@ var (
 
 type RegisterPointFact struct {
 	PointFact
-	symbol        currencytypes.CurrencyID
+	symbol        types.PointID
 	name          string
 	initialSupply common.Big
 }
@@ -27,7 +28,7 @@ func NewRegisterPointFact(
 	token []byte,
 	sender, contract base.Address,
 	currency currencytypes.CurrencyID,
-	symbol currencytypes.CurrencyID,
+	symbol types.PointID,
 	name string,
 	initialSupply common.Big,
 ) RegisterPointFact {
@@ -81,7 +82,7 @@ func (fact RegisterPointFact) Name() string {
 	return fact.name
 }
 
-func (fact RegisterPointFact) Symbol() currencytypes.CurrencyID {
+func (fact RegisterPointFact) Symbol() types.PointID {
 	return fact.symbol
 }
 

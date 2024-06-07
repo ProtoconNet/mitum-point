@@ -16,7 +16,7 @@ type PointBalanceStateValueJSONMarshaler struct {
 func (s PointBalanceStateValue) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(PointBalanceStateValueJSONMarshaler{
 		BaseHinter: s.BaseHinter,
-		Amount:     s.amount,
+		Amount:     s.Amount,
 	})
 }
 
@@ -36,7 +36,7 @@ func (s *PointBalanceStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error
 	if err != nil {
 		return e.Wrap(err)
 	}
-	s.amount = big
+	s.Amount = big
 
 	return nil
 }

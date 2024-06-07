@@ -159,31 +159,35 @@ func (opp *TransferProcessor) Process(
 		return nil, ErrStateNotFound("point balance", utils.JoinStringers(fact.Contract(), fact.Sender()), err), nil
 	}
 
-	sb, err := state.StatePointBalanceValue(st)
+	_, err = state.StatePointBalanceValue(st)
 	if err != nil {
 		return nil, ErrStateNotFound("point balance value", utils.JoinStringers(fact.Contract(), fact.Sender()), err), nil
 	}
 
-	sts = append(sts, currencystate.NewStateMergeValue(
+	sts = append(sts, common.NewBaseStateMergeValue(
 		g.PointBalance(fact.Sender()),
-		state.NewPointBalanceStateValue(sb.Sub(fact.Amount())),
+		state.NewDeductPointBalanceStateValue(fact.Amount()),
+		func(height base.Height, st base.State) base.StateValueMerger {
+			return state.NewPointBalanceStateValueMerger(height, g.PointBalance(fact.Sender()), st)
+		},
 	))
 
-	rb := common.ZeroBig
 	switch st, found, err := getStateFunc(g.PointBalance(fact.Receiver())); {
 	case err != nil:
 		return nil, ErrBaseOperationProcess(err, "failed to check point balance, %s, %s", fact.Contract(), fact.Receiver()), nil
 	case found:
-		b, err := state.StatePointBalanceValue(st)
+		_, err = state.StatePointBalanceValue(st)
 		if err != nil {
 			return nil, ErrBaseOperationProcess(err, "failed to get point balance value from state, %s, %s", fact.Contract(), fact.Receiver()), nil
 		}
-		rb = b
 	}
 
-	sts = append(sts, currencystate.NewStateMergeValue(
+	sts = append(sts, common.NewBaseStateMergeValue(
 		g.PointBalance(fact.Receiver()),
-		state.NewPointBalanceStateValue(rb.Add(fact.Amount())),
+		state.NewAddPointBalanceStateValue(fact.Amount()),
+		func(height base.Height, st base.State) base.StateValueMerger {
+			return state.NewPointBalanceStateValueMerger(height, g.PointBalance(fact.Receiver()), st)
+		},
 	))
 
 	return sts, nil, nil

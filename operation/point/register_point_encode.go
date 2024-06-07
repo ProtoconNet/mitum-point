@@ -2,7 +2,7 @@ package point
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -13,7 +13,7 @@ func (fact *RegisterPointFact) unpack(enc encoder.Encoder,
 ) error {
 	e := util.StringError(utils.ErrStringUnPack(*fact))
 
-	fact.symbol = currencytypes.CurrencyID(symbol)
+	fact.symbol = types.PointID(symbol)
 	fact.name = name
 
 	big, err := common.NewBigFromString(ts)

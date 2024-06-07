@@ -3,6 +3,7 @@ package point
 import (
 	"context"
 	"fmt"
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"sync"
 
 	"github.com/ProtoconNet/mitum-point/types"
@@ -180,9 +181,16 @@ func (opp *RegisterPointProcessor) Process(
 	))
 
 	if fact.InitialSupply().OverZero() {
-		sts = append(sts, currencystate.NewStateMergeValue(
+		sts = append(sts, common.NewBaseStateMergeValue(
 			g.PointBalance(fact.Sender()),
-			state.NewPointBalanceStateValue(fact.InitialSupply()),
+			state.NewAddPointBalanceStateValue(fact.InitialSupply()),
+			func(height base.Height, st base.State) base.StateValueMerger {
+				return state.NewPointBalanceStateValueMerger(
+					height,
+					g.PointBalance(fact.Sender()),
+					st,
+				)
+			},
 		))
 	}
 

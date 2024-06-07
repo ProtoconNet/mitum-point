@@ -175,21 +175,27 @@ func (opp *MintProcessor) Process(
 		state.NewDesignStateValue(de),
 	))
 
-	rb := common.ZeroBig
+	k := g.PointBalance(fact.Receiver())
 	switch st, found, err := getStateFunc(g.PointBalance(fact.Receiver())); {
 	case err != nil:
 		return nil, ErrBaseOperationProcess(err, "failed to check point balance, %s, %s", fact.Contract(), fact.Receiver()), nil
 	case found:
-		b, err := state.StatePointBalanceValue(st)
+		_, err := state.StatePointBalanceValue(st)
 		if err != nil {
 			return nil, ErrBaseOperationProcess(err, "failed to get point balance value from state, %s, %s", fact.Contract(), fact.Receiver()), nil
 		}
-		rb = b
 	}
 
-	sts = append(sts, currencystate.NewStateMergeValue(
-		g.PointBalance(fact.Receiver()),
-		state.NewPointBalanceStateValue(rb.Add(fact.Amount())),
+	sts = append(sts, common.NewBaseStateMergeValue(
+		k,
+		state.NewAddPointBalanceStateValue(fact.Amount()),
+		func(height base.Height, st base.State) base.StateValueMerger {
+			return state.NewPointBalanceStateValueMerger(
+				height,
+				k,
+				st,
+			)
+		},
 	))
 
 	return sts, nil, nil

@@ -13,9 +13,9 @@ import (
 
 type RegisterPointCommand struct {
 	OperationCommand
-	Symbol        currencycmds.CurrencyIDFlag `arg:"" name:"symbol" help:"point symbol" required:"true"`
-	Name          string                      `arg:"" name:"name" help:"point name" required:"true"`
-	InitialSupply currencycmds.BigFlag        `arg:"" name:"initial-supply" help:"initial supply of point" required:"true"`
+	Symbol        PointIDFlag          `arg:"" name:"symbol" help:"point symbol" required:"true"`
+	Name          string               `arg:"" name:"name" help:"point name" required:"true"`
+	InitialSupply currencycmds.BigFlag `arg:"" name:"initial-supply" help:"initial supply of point" required:"true"`
 }
 
 func (cmd *RegisterPointCommand) Run(pctx context.Context) error { // nolint:dupl

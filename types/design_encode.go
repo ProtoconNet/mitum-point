@@ -1,7 +1,6 @@
 package types
 
 import (
-	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -13,7 +12,7 @@ func (d *Design) unpack(enc encoder.Encoder, ht hint.Hint, symbol, name string, 
 	e := util.StringError(utils.ErrStringUnPack(*d))
 
 	d.BaseHinter = hint.NewBaseHinter(ht)
-	d.symbol = types.CurrencyID(symbol)
+	d.symbol = PointID(symbol)
 	d.name = name
 
 	if hinter, err := enc.Decode(bp); err != nil {
