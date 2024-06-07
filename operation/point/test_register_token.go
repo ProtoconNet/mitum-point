@@ -4,6 +4,7 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/test"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
+	pointtypes "github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum2/base"
 )
 
@@ -73,7 +74,7 @@ func (t *TestRegisterPointProcessor) Print(fileName string,
 
 func (t *TestRegisterPointProcessor) MakeOperation(
 	sender base.Address, privatekey base.Privatekey, contract base.Address,
-	symbol types.CurrencyID, name string, initialSupply int64, currency types.CurrencyID,
+	symbol pointtypes.PointSymbol, name string, initialSupply int64, currency types.CurrencyID,
 ) *TestRegisterPointProcessor {
 	op := NewRegisterPoint(
 		NewRegisterPointFact(

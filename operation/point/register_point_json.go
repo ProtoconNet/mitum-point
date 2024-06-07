@@ -9,9 +9,9 @@ import (
 
 type RegisterPointFactJSONMarshaler struct {
 	PointFactJSONMarshaler
-	Symbol        types.PointID `json:"symbol"`
-	Name          string        `json:"name"`
-	InitialSupply common.Big    `json:"initial_supply"`
+	Symbol        types.PointSymbol `json:"symbol"`
+	Name          string            `json:"name"`
+	InitialSupply common.Big        `json:"initial_supply"`
 }
 
 func (fact RegisterPointFact) MarshalJSON() ([]byte, error) {

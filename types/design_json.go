@@ -11,9 +11,9 @@ import (
 
 type DesignJSONMarshaler struct {
 	hint.BaseHinter
-	Symbol PointID `json:"symbol"`
-	Name   string  `json:"name"`
-	Policy Policy  `json:"policy"`
+	Symbol PointSymbol `json:"symbol"`
+	Name   string      `json:"name"`
+	Policy Policy      `json:"policy"`
 }
 
 func (d Design) MarshalJSON() ([]byte, error) {

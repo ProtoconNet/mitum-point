@@ -18,7 +18,7 @@ var (
 
 type RegisterPointFact struct {
 	PointFact
-	symbol        types.PointID
+	symbol        types.PointSymbol
 	name          string
 	initialSupply common.Big
 }
@@ -27,7 +27,7 @@ func NewRegisterPointFact(
 	token []byte,
 	sender, contract base.Address,
 	currency currencytypes.CurrencyID,
-	symbol types.PointID,
+	symbol types.PointSymbol,
 	name string,
 	initialSupply common.Big,
 ) RegisterPointFact {
@@ -53,7 +53,9 @@ func (fact RegisterPointFact) IsValid(b []byte) error {
 	}
 
 	if !fact.initialSupply.OverNil() {
-		return common.ErrFactInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("zero initial supply")))
+		return common.ErrFactInvalid.Wrap(
+			common.ErrValOOR.Wrap(
+				errors.Errorf("initial supply must be bigger than or equal to zero, got %v", fact.initialSupply)))
 	}
 
 	if err := common.IsValidOperationFact(fact, b); err != nil {
@@ -79,7 +81,7 @@ func (fact RegisterPointFact) Name() string {
 	return fact.name
 }
 
-func (fact RegisterPointFact) Symbol() types.PointID {
+func (fact RegisterPointFact) Symbol() types.PointSymbol {
 	return fact.symbol
 }
 

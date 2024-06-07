@@ -5,20 +5,20 @@ import (
 	"github.com/ProtoconNet/mitum-point/types"
 )
 
-type PointIDFlag struct {
-	CID types.PointID
+type PointSymbolFlag struct {
+	Symbol types.PointSymbol
 }
 
-func (v *PointIDFlag) UnmarshalText(b []byte) error {
-	cid := types.PointID(string(b))
+func (v *PointSymbolFlag) UnmarshalText(b []byte) error {
+	cid := types.PointSymbol(string(b))
 	if err := cid.IsValid(nil); err != nil {
-		return fmt.Errorf("invalid point id, %q, %w", string(b), err)
+		return fmt.Errorf("invalid point symbol, %q, %w", string(b), err)
 	}
-	v.CID = cid
+	v.Symbol = cid
 
 	return nil
 }
 
-func (v *PointIDFlag) String() string {
-	return v.CID.String()
+func (v *PointSymbolFlag) String() string {
+	return v.Symbol.String()
 }

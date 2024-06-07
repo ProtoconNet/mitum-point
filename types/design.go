@@ -11,12 +11,12 @@ var DesignHint = hint.MustNewHint("mitum-point-design-v0.0.1")
 
 type Design struct {
 	hint.BaseHinter
-	symbol PointID
+	symbol PointSymbol
 	name   string
 	policy Policy
 }
 
-func NewDesign(symbol PointID, name string, policy Policy) Design {
+func NewDesign(symbol PointSymbol, name string, policy Policy) Design {
 	return Design{
 		BaseHinter: hint.NewBaseHinter(DesignHint),
 		symbol:     symbol,
@@ -51,7 +51,7 @@ func (d Design) Bytes() []byte {
 	)
 }
 
-func (d Design) Symbol() PointID {
+func (d Design) Symbol() PointSymbol {
 	return d.symbol
 }
 

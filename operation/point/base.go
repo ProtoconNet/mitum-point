@@ -97,7 +97,7 @@ func calculateCurrencyFee(fact PointFact, getStateFunc base.GetStateFunc) (
 
 	senderBalSt, err := state.ExistsState(
 		currencystate.StateKeyBalance(fact.Sender(), fact.Currency()),
-		"key of sender balance",
+		"sender balance",
 		getStateFunc,
 	)
 	if err != nil {

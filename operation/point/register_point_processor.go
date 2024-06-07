@@ -82,7 +82,7 @@ func (opp *RegisterPointProcessor) PreProcess(
 	_, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("%v: %v", fact.Currency(), err)), nil
+			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id %v", fact.Currency())), nil
 	}
 
 	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
@@ -92,7 +92,7 @@ func (opp *RegisterPointProcessor) PreProcess(
 	} else if cErr != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender account is contract account, %v", fact.Sender(), cErr)), nil
+				Errorf("%v: sender account is contract account, %v", cErr, fact.Sender())), nil
 	}
 
 	_, cSt, aErr, cErr := currencystate.ExistsCAccount(fact.Contract(), "contract", true, true, getStateFunc)
@@ -116,7 +116,8 @@ func (opp *RegisterPointProcessor) PreProcess(
 	if ca.IsActive() {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceE).Errorf("point design, %v", fact.Contract())), nil
+				Wrap(common.ErrMValueInvalid).Errorf(
+				"contract account %v has already been activated", fact.Contract())), nil
 	}
 
 	g := state.NewStateKeyGenerator(fact.Contract())
@@ -124,14 +125,14 @@ func (opp *RegisterPointProcessor) PreProcess(
 	if found, _ := currencystate.CheckNotExistsState(g.Design(), getStateFunc); found {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceE).Errorf("point design, %v", fact.Contract())), nil
+				Wrap(common.ErrMServiceE).Errorf("point design for contract account %v", fact.Contract())), nil
 	}
 
 	if fact.InitialSupply().OverZero() {
 		if found, _ := currencystate.CheckNotExistsState(g.PointBalance(ca.Owner()), getStateFunc); found {
 			return ctx, base.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.
-					Wrap(common.ErrMServiceE).Errorf("point balance, %v", fact.Contract())), nil
+					Wrap(common.ErrMServiceE).Errorf("point initial supply for contract account %v", fact.Contract())), nil
 		}
 	}
 
@@ -183,7 +184,7 @@ func (opp *RegisterPointProcessor) Process(
 		state.NewDesignStateValue(design),
 	))
 
-	st, err := currencystate.ExistsState(extstate.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
+	st, err := currencystate.ExistsState(extstate.StateKeyContractAccount(fact.Contract()), "contract account", getStateFunc)
 	if err != nil {
 		return nil, ErrStateNotFound("contract", fact.Contract().String(), err), nil
 	}
