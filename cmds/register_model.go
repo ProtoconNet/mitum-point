@@ -40,7 +40,7 @@ func (cmd *RegisterPointCommand) Run(pctx context.Context) error { // nolint:dup
 func (cmd *RegisterPointCommand) createOperation() (base.Operation, error) { // nolint:dupl}
 	e := util.StringError(utils.ErrStringCreate("register-point operation"))
 
-	fact := point.NewRegisterPointFact(
+	fact := point.NewRegisterModelFact(
 		[]byte(cmd.Token),
 		cmd.sender, cmd.contract,
 		cmd.Currency.CID, cmd.Symbol.Symbol,
@@ -48,7 +48,7 @@ func (cmd *RegisterPointCommand) createOperation() (base.Operation, error) { // 
 		cmd.InitialSupply.Big,
 	)
 
-	op := point.NewRegisterPoint(fact)
+	op := point.NewRegisterModel(fact)
 	if err := op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID()); err != nil {
 		return nil, e.Wrap(err)
 	}

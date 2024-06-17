@@ -9,16 +9,16 @@ import (
 )
 
 type TestRegisterPointProcessor struct {
-	*test.BaseTestOperationProcessorNoItem[RegisterPoint]
+	*test.BaseTestOperationProcessorNoItem[RegisterModel]
 }
 
 func NewTestRegisterPointProcessor(tp *test.TestProcessor) TestRegisterPointProcessor {
-	t := test.NewBaseTestOperationProcessorNoItem[RegisterPoint](tp)
+	t := test.NewBaseTestOperationProcessorNoItem[RegisterModel](tp)
 	return TestRegisterPointProcessor{BaseTestOperationProcessorNoItem: &t}
 }
 
 func (t *TestRegisterPointProcessor) Create() *TestRegisterPointProcessor {
-	t.Opr, _ = NewRegisterPointProcessor()(
+	t.Opr, _ = NewRegisterModelProcessor()(
 		base.GenesisHeight,
 		t.GetStateFunc,
 		nil, nil,
@@ -76,8 +76,8 @@ func (t *TestRegisterPointProcessor) MakeOperation(
 	sender base.Address, privatekey base.Privatekey, contract base.Address,
 	symbol pointtypes.PointSymbol, name string, initialSupply int64, currency types.CurrencyID,
 ) *TestRegisterPointProcessor {
-	op := NewRegisterPoint(
-		NewRegisterPointFact(
+	op := NewRegisterModel(
+		NewRegisterModelFact(
 			[]byte("Point"),
 			sender,
 			contract,

@@ -12,28 +12,28 @@ import (
 )
 
 var (
-	RegisterPointFactHint = hint.MustNewHint("mitum-point-register-point-operation-fact-v0.0.1")
-	RegisterPointHint     = hint.MustNewHint("mitum-point-register-point-operation-v0.0.1")
+	RegisterModelFactHint = hint.MustNewHint("mitum-point-register-model-operation-fact-v0.0.1")
+	RegisterModelHint     = hint.MustNewHint("mitum-point-register-model-operation-v0.0.1")
 )
 
-type RegisterPointFact struct {
+type RegisterModelFact struct {
 	PointFact
 	symbol        types.PointSymbol
 	name          string
 	initialSupply common.Big
 }
 
-func NewRegisterPointFact(
+func NewRegisterModelFact(
 	token []byte,
 	sender, contract base.Address,
 	currency currencytypes.CurrencyID,
 	symbol types.PointSymbol,
 	name string,
 	initialSupply common.Big,
-) RegisterPointFact {
-	fact := RegisterPointFact{
+) RegisterModelFact {
+	fact := RegisterModelFact{
 		PointFact: NewPointFact(
-			base.NewBaseFact(RegisterPointFactHint, token), sender, contract, currency,
+			base.NewBaseFact(RegisterModelFactHint, token), sender, contract, currency,
 		),
 		symbol:        symbol,
 		name:          name,
@@ -43,7 +43,7 @@ func NewRegisterPointFact(
 	return fact
 }
 
-func (fact RegisterPointFact) IsValid(b []byte) error {
+func (fact RegisterModelFact) IsValid(b []byte) error {
 	if err := util.CheckIsValiders(nil, false, fact.PointFact, fact.symbol); err != nil {
 		return common.ErrFactInvalid.Wrap(err)
 	}
@@ -64,11 +64,11 @@ func (fact RegisterPointFact) IsValid(b []byte) error {
 	return nil
 }
 
-func (fact RegisterPointFact) GenerateHash() util.Hash {
+func (fact RegisterModelFact) GenerateHash() util.Hash {
 	return valuehash.NewSHA256(fact.Bytes())
 }
 
-func (fact RegisterPointFact) Bytes() []byte {
+func (fact RegisterModelFact) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		fact.PointFact.Bytes(),
 		fact.symbol.Bytes(),
@@ -77,22 +77,22 @@ func (fact RegisterPointFact) Bytes() []byte {
 	)
 }
 
-func (fact RegisterPointFact) Name() string {
+func (fact RegisterModelFact) Name() string {
 	return fact.name
 }
 
-func (fact RegisterPointFact) Symbol() types.PointSymbol {
+func (fact RegisterModelFact) Symbol() types.PointSymbol {
 	return fact.symbol
 }
 
-func (fact RegisterPointFact) InitialSupply() common.Big {
+func (fact RegisterModelFact) InitialSupply() common.Big {
 	return fact.initialSupply
 }
 
-type RegisterPoint struct {
+type RegisterModel struct {
 	common.BaseOperation
 }
 
-func NewRegisterPoint(fact RegisterPointFact) RegisterPoint {
-	return RegisterPoint{BaseOperation: common.NewBaseOperation(RegisterPointHint, fact)}
+func NewRegisterModel(fact RegisterModelFact) RegisterModel {
+	return RegisterModel{BaseOperation: common.NewBaseOperation(RegisterModelHint, fact)}
 }

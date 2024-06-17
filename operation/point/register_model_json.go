@@ -7,15 +7,15 @@ import (
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
-type RegisterPointFactJSONMarshaler struct {
+type RegisterModelFactJSONMarshaler struct {
 	PointFactJSONMarshaler
 	Symbol        types.PointSymbol `json:"symbol"`
 	Name          string            `json:"name"`
 	InitialSupply common.Big        `json:"initial_supply"`
 }
 
-func (fact RegisterPointFact) MarshalJSON() ([]byte, error) {
-	return util.MarshalJSON(RegisterPointFactJSONMarshaler{
+func (fact RegisterModelFact) MarshalJSON() ([]byte, error) {
+	return util.MarshalJSON(RegisterModelFactJSONMarshaler{
 		PointFactJSONMarshaler: fact.PointFact.JSONMarshaler(),
 		Symbol:                 fact.symbol,
 		Name:                   fact.name,
@@ -23,18 +23,18 @@ func (fact RegisterPointFact) MarshalJSON() ([]byte, error) {
 	})
 }
 
-type RegisterPointFactJSONUnMarshaler struct {
+type RegisterModelFactJSONUnMarshaler struct {
 	Symbol        string `json:"symbol"`
 	Name          string `json:"name"`
 	InitialSupply string `json:"initial_supply"`
 }
 
-func (fact *RegisterPointFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
+func (fact *RegisterModelFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	if err := fact.PointFact.DecodeJSON(b, enc); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
-	var uf RegisterPointFactJSONUnMarshaler
+	var uf RegisterModelFactJSONUnMarshaler
 	if err := enc.Unmarshal(b, &uf); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}

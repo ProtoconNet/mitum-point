@@ -6,7 +6,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
-func (fact *RegisterPointFact) unpack(_ encoder.Encoder,
+func (fact *RegisterModelFact) unpack(_ encoder.Encoder,
 	symbol, name, ts string,
 ) error {
 	fact.symbol = types.PointSymbol(symbol)

@@ -23,7 +23,7 @@ var AddedHinters = []encoder.DecodeDetail{
 	{Hint: state.DesignStateValueHint, Instance: state.DesignStateValue{}},
 	{Hint: state.PointBalanceStateValueHint, Instance: state.PointBalanceStateValue{}},
 
-	{Hint: point.RegisterPointHint, Instance: point.RegisterPoint{}},
+	{Hint: point.RegisterModelHint, Instance: point.RegisterModel{}},
 	{Hint: point.MintHint, Instance: point.Mint{}},
 	{Hint: point.BurnHint, Instance: point.Burn{}},
 	{Hint: point.ApproveHint, Instance: point.Approve{}},
@@ -32,7 +32,7 @@ var AddedHinters = []encoder.DecodeDetail{
 }
 
 var AddedSupportedHinters = []encoder.DecodeDetail{
-	{Hint: point.RegisterPointFactHint, Instance: point.RegisterPointFact{}},
+	{Hint: point.RegisterModelFactHint, Instance: point.RegisterModelFact{}},
 	{Hint: point.MintFactHint, Instance: point.MintFact{}},
 	{Hint: point.BurnFactHint, Instance: point.BurnFact{}},
 	{Hint: point.ApproveFactHint, Instance: point.ApproveFact{}},

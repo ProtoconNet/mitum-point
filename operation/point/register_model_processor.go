@@ -18,34 +18,34 @@ import (
 	"github.com/pkg/errors"
 )
 
-var registerPointProcessorPool = sync.Pool{
+var registerModelProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(RegisterPointProcessor)
+		return new(RegisterModelProcessor)
 	},
 }
 
-func (RegisterPoint) Process(
+func (RegisterModel) Process(
 	_ context.Context, _ base.GetStateFunc,
 ) ([]base.StateMergeValue, base.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
 
-type RegisterPointProcessor struct {
+type RegisterModelProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewRegisterPointProcessor() currencytypes.GetNewProcessor {
+func NewRegisterModelProcessor() currencytypes.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
 		newPreProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 		newProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 	) (base.OperationProcessor, error) {
-		t := RegisterPointProcessor{}
+		t := RegisterModelProcessor{}
 		e := util.StringError(utils.ErrStringCreate(fmt.Sprintf("new %T", t)))
 
-		nopp := registerPointProcessorPool.Get()
-		opp, ok := nopp.(*RegisterPointProcessor)
+		nopp := registerModelProcessorPool.Get()
+		opp, ok := nopp.(*RegisterModelProcessor)
 		if !ok {
 			return nil, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(&t, nopp)))
 		}
@@ -62,15 +62,15 @@ func NewRegisterPointProcessor() currencytypes.GetNewProcessor {
 	}
 }
 
-func (opp *RegisterPointProcessor) PreProcess(
+func (opp *RegisterModelProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
-	fact, ok := op.Fact().(RegisterPointFact)
+	fact, ok := op.Fact().(RegisterModelFact)
 	if !ok {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMTypeMismatch).
-				Errorf("expected %T, not %T", RegisterPointFact{}, op.Fact())), nil
+				Errorf("expected %T, not %T", RegisterModelFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
@@ -146,15 +146,15 @@ func (opp *RegisterPointProcessor) PreProcess(
 	return ctx, nil, nil
 }
 
-func (opp *RegisterPointProcessor) Process(
+func (opp *RegisterModelProcessor) Process(
 	_ context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
 	e := util.StringError(ErrStringProcess(*opp))
 
-	fact, ok := op.Fact().(RegisterPointFact)
+	fact, ok := op.Fact().(RegisterModelFact)
 	if !ok {
-		return nil, nil, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(RegisterPointFact{}, op.Fact())))
+		return nil, nil, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(RegisterModelFact{}, op.Fact())))
 	}
 
 	g := state.NewStateKeyGenerator(fact.Contract())
@@ -217,7 +217,7 @@ func (opp *RegisterPointProcessor) Process(
 	return sts, nil, nil
 }
 
-func (opp *RegisterPointProcessor) Close() error {
-	registerPointProcessorPool.Put(opp)
+func (opp *RegisterModelProcessor) Close() error {
+	registerModelProcessorPool.Put(opp)
 	return nil
 }

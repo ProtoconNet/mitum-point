@@ -29,11 +29,11 @@ func Point(st *currencydigest.Database, contract string) (*types.Design, error) 
 	var design *types.Design
 	var sta mitumbase.State
 	var err error
-	if err := st.DatabaseClient().GetByFilter(
+	if err := st.MongoClient().GetByFilter(
 		defaultColNamePoint,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
+			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -60,11 +60,11 @@ func PointBalance(st *currencydigest.Database, contract, account string) (common
 	var amount common.Big
 	var sta mitumbase.State
 	var err error
-	if err := st.DatabaseClient().GetByFilter(
+	if err := st.MongoClient().GetByFilter(
 		defaultColNamePointBalance,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
+			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}

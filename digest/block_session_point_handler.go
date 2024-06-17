@@ -42,7 +42,7 @@ func (bs *BlockSession) preparePoint() error {
 }
 
 func (bs *BlockSession) handlePointState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	if pointDoc, err := NewPointDoc(st, bs.st.DatabaseEncoder()); err != nil {
+	if pointDoc, err := NewPointDoc(st, bs.st.Encoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
@@ -52,7 +52,7 @@ func (bs *BlockSession) handlePointState(st mitumbase.State) ([]mongo.WriteModel
 }
 
 func (bs *BlockSession) handlePointBalanceState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	if pointBalanceDoc, err := NewPointBalanceDoc(st, bs.st.DatabaseEncoder()); err != nil {
+	if pointBalanceDoc, err := NewPointBalanceDoc(st, bs.st.Encoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
