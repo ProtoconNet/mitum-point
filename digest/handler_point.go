@@ -107,15 +107,21 @@ func (hd *Handlers) handlePointBalanceInGroup(contract, account string) (interfa
 	}
 }
 
-func (hd *Handlers) buildPointBalanceHal(contract, account string, amount common.Big) (currencydigest.Hal, error) {
-	h, err := hd.combineURL(HandlerPathPointBalance, "contract", contract, "address", account)
-	if err != nil {
-		return nil, err
-	}
+func (hd *Handlers) buildPointBalanceHal(contract, account string, amount *common.Big) (currencydigest.Hal, error) {
+	var hal currencydigest.Hal
 
-	hal := currencydigest.NewBaseHal(struct {
-		Amount common.Big `json:"amount"`
-	}{Amount: amount}, currencydigest.NewHalLink(h, nil))
+	if amount == nil {
+		hal = currencydigest.NewEmptyHal()
+	} else {
+		h, err := hd.combineURL(HandlerPathPointBalance, "contract", contract, "address", account)
+		if err != nil {
+			return nil, err
+		}
+
+		hal = currencydigest.NewBaseHal(struct {
+			Amount common.Big `json:"amount"`
+		}{Amount: *amount}, currencydigest.NewHalLink(h, nil))
+	}
 
 	return hal, nil
 }
