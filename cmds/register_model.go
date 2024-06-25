@@ -15,6 +15,7 @@ type RegisterPointCommand struct {
 	OperationCommand
 	Symbol        PointSymbolFlag      `arg:"" name:"symbol" help:"point symbol" required:"true"`
 	Name          string               `arg:"" name:"name" help:"point name" required:"true"`
+	Decimal       currencycmds.BigFlag `arg:"" name:"decimal" help:"decimal of point" required:"true"`
 	InitialSupply currencycmds.BigFlag `arg:"" name:"initial-supply" help:"initial supply of point" required:"true"`
 }
 
@@ -45,6 +46,7 @@ func (cmd *RegisterPointCommand) createOperation() (base.Operation, error) { // 
 		cmd.sender, cmd.contract,
 		cmd.Currency.CID, cmd.Symbol.Symbol,
 		cmd.Name,
+		cmd.Decimal.Big,
 		cmd.InitialSupply.Big,
 	)
 
