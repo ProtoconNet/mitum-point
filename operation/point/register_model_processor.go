@@ -128,14 +128,6 @@ func (opp *RegisterModelProcessor) PreProcess(
 				Wrap(common.ErrMServiceE).Errorf("point design for contract account %v", fact.Contract())), nil
 	}
 
-	if fact.InitialSupply().OverZero() {
-		if found, _ := currencystate.CheckNotExistsState(g.PointBalance(ca.Owner()), getStateFunc); found {
-			return ctx, base.NewBaseOperationProcessReasonError(
-				common.ErrMPreProcess.
-					Wrap(common.ErrMServiceE).Errorf("point initial supply for contract account %v", fact.Contract())), nil
-		}
-	}
-
 	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.

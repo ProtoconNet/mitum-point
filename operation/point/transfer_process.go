@@ -159,12 +159,7 @@ func (opp *TransferProcessor) Process(
 	_ context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
-	e := util.StringError(ErrStringProcess(*opp))
-
-	fact, ok := op.Fact().(TransferFact)
-	if !ok {
-		return nil, nil, e.Wrap(errors.Errorf(utils.ErrStringTypeCast(TransferFact{}, op.Fact())))
-	}
+	fact, _ := op.Fact().(TransferFact)
 
 	g := state.NewStateKeyGenerator(fact.Contract())
 
@@ -176,16 +171,6 @@ func (opp *TransferProcessor) Process(
 	}
 	if len(v) > 0 {
 		sts = append(sts, v...)
-	}
-
-	st, err := currencystate.ExistsState(g.PointBalance(fact.Sender()), "point balance", getStateFunc)
-	if err != nil {
-		return nil, ErrStateNotFound("point balance", utils.JoinStringers(fact.Contract(), fact.Sender()), err), nil
-	}
-
-	_, err = state.StatePointBalanceValue(st)
-	if err != nil {
-		return nil, ErrStateNotFound("point balance value", utils.JoinStringers(fact.Contract(), fact.Sender()), err), nil
 	}
 
 	sts = append(sts, common.NewBaseStateMergeValue(
