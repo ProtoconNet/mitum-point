@@ -23,8 +23,8 @@ import (
 )
 
 var (
-	HandlerPathPoint        = `/point/{contract:.*}`
-	HandlerPathPointBalance = `/point/{contract:.*}/account/{address:(?i)` + base.REStringAddressString + `}` // revive:disable-line:line-length-limit
+	HandlerPathPoint        = `/point/{contract:(?i)` + base.REStringAddressString + `}`
+	HandlerPathPointBalance = `/point/{contract:(?i)` + base.REStringAddressString + `}/account/{address:(?i)` + base.REStringAddressString + `}` // revive:disable-line:line-length-limit
 )
 
 func init() {
