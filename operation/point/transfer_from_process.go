@@ -107,12 +107,8 @@ func (opp *TransferFromProcessor) PreProcess(
 				Errorf("%v", cErr)), nil
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(
-		fact.Receiver(), "receiver", true, false, getStateFunc); aErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", aErr)), nil
-	} else if cErr != nil {
+	if _, _, _, cErr := currencystate.ExistsCAccount(
+		fact.Receiver(), "receiver", true, false, getStateFunc); cErr != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
 				Errorf("%v: receiver %v is contract account", cErr, fact.Receiver())), nil
@@ -289,6 +285,13 @@ func (opp *TransferFromProcessor) Process(
 			return state.NewPointBalanceStateValueMerger(height, g.PointBalance(fact.Target()), st)
 		},
 	))
+
+	smv, err := currencystate.CreateNotExistAccount(fact.Receiver(), getStateFunc)
+	if err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("%w", err), nil
+	} else if smv != nil {
+		sts = append(sts, smv)
+	}
 
 	switch st, found, err := getStateFunc(g.PointBalance(fact.Receiver())); {
 	case err != nil:
