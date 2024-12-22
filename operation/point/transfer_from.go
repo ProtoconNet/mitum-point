@@ -2,6 +2,7 @@ package point
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -116,10 +117,16 @@ func (fact TransferFromFact) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
+func (fact TransferFromFact) ActiveContract() []base.Address {
+	return []base.Address{fact.contract}
+}
+
 type TransferFrom struct {
-	common.BaseOperation
+	extras.ExtendedOperation
 }
 
 func NewTransferFrom(fact TransferFromFact) TransferFrom {
-	return TransferFrom{BaseOperation: common.NewBaseOperation(TransferFromHint, fact)}
+	return TransferFrom{
+		ExtendedOperation: extras.NewExtendedOperation(TransferFromHint, fact),
+	}
 }

@@ -84,41 +84,10 @@ func (opp *BurnProcessor) PreProcess(
 			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id %v", fact.Currency())), nil
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", aErr)), nil
-	} else if cErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender account is contract account, %v", cErr, fact.Sender())), nil
-	}
-
-	_, _, aErr, cErr := currencystate.ExistsCAccount(fact.Contract(), "contract", true, true, getStateFunc)
-	if aErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", aErr)), nil
-	} else if cErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", cErr)), nil
-	}
-
 	if !fact.Sender().Equal(fact.Target()) {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMValueInvalid).
 				Errorf("target %v is not point owner in contract account %v", fact.Target(), fact.Contract())), nil
-	}
-
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "target", true, false, getStateFunc); aErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", aErr)), nil
-	} else if cErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: target %v is contract account", cErr, fact.Target())), nil
 	}
 
 	g := state.NewStateKeyGenerator(fact.Contract())
@@ -150,13 +119,6 @@ func (opp *BurnProcessor) PreProcess(
 					fact.Target(), fact.Contract(), tb, fact.Amount())), nil
 	}
 
-	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Wrap(common.ErrMSignInvalid).
-				Errorf("%v", err)), nil
-	}
-
 	return ctx, nil, nil
 }
 
@@ -169,14 +131,6 @@ func (opp *BurnProcessor) Process(
 	g := state.NewStateKeyGenerator(fact.Contract())
 
 	var sts []base.StateMergeValue
-
-	v, baseErr, err := calculateCurrencyFee(fact.PointFact, getStateFunc)
-	if baseErr != nil || err != nil {
-		return nil, baseErr, err
-	}
-	if len(v) > 0 {
-		sts = append(sts, v...)
-	}
 
 	st, _ := currencystate.ExistsState(g.Design(), "design", getStateFunc)
 	design, _ := state.StateDesignValue(st)
@@ -199,7 +153,7 @@ func (opp *BurnProcessor) Process(
 		state.NewDesignStateValue(de),
 	))
 
-	st, err = currencystate.ExistsState(g.PointBalance(fact.Target()), "point balance", getStateFunc)
+	st, err := currencystate.ExistsState(g.PointBalance(fact.Target()), "point balance", getStateFunc)
 	if err != nil {
 		return nil, ErrBaseOperationProcess(err, "point balance not found, %s, %s", fact.Contract(), fact.Target()), nil
 	}

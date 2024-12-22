@@ -2,6 +2,7 @@ package point
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum2/base"
@@ -103,10 +104,16 @@ func (fact RegisterModelFact) InitialSupply() common.Big {
 	return fact.initialSupply
 }
 
+func (fact RegisterModelFact) InActiveContractOwnerHandlerOnly() [][2]base.Address {
+	return [][2]base.Address{{fact.contract, fact.sender}}
+}
+
 type RegisterModel struct {
-	common.BaseOperation
+	extras.ExtendedOperation
 }
 
 func NewRegisterModel(fact RegisterModelFact) RegisterModel {
-	return RegisterModel{BaseOperation: common.NewBaseOperation(RegisterModelHint, fact)}
+	return RegisterModel{
+		ExtendedOperation: extras.NewExtendedOperation(RegisterModelHint, fact),
+	}
 }

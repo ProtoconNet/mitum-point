@@ -85,54 +85,12 @@ func (opp *RegisterModelProcessor) PreProcess(
 			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id %v", fact.Currency())), nil
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", aErr)), nil
-	} else if cErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender account is contract account, %v", cErr, fact.Sender())), nil
-	}
-
-	_, cSt, aErr, cErr := currencystate.ExistsCAccount(fact.Contract(), "contract", true, true, getStateFunc)
-	if aErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", aErr)), nil
-	} else if cErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", cErr)), nil
-	}
-
-	ca, err := extstate.CheckCAAuthFromState(cSt, fact.Sender())
-	if err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", err)), nil
-	}
-
-	if ca.IsActive() {
-		return nil, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceE).Errorf(
-				"contract account %v has already been activated", fact.Contract())), nil
-	}
-
 	g := state.NewStateKeyGenerator(fact.Contract())
 
 	if found, _ := currencystate.CheckNotExistsState(g.Design(), getStateFunc); found {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMServiceE).Errorf("point design for contract account %v", fact.Contract())), nil
-	}
-
-	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Wrap(common.ErrMSignInvalid).
-				Errorf("%v", err)), nil
 	}
 
 	return ctx, nil, nil
@@ -152,14 +110,6 @@ func (opp *RegisterModelProcessor) Process(
 	g := state.NewStateKeyGenerator(fact.Contract())
 
 	var sts []base.StateMergeValue
-
-	v, baseErr, err := calculateCurrencyFee(fact.PointFact, getStateFunc)
-	if baseErr != nil || err != nil {
-		return nil, baseErr, err
-	}
-	if len(v) > 0 {
-		sts = append(sts, v...)
-	}
 
 	policy := types.NewPolicy(fact.InitialSupply(), []types.ApproveBox{})
 	if err := policy.IsValid(nil); err != nil {

@@ -2,6 +2,7 @@ package point
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -92,10 +93,16 @@ func (fact BurnFact) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
+func (fact BurnFact) ActiveContract() []base.Address {
+	return []base.Address{fact.contract}
+}
+
 type Burn struct {
-	common.BaseOperation
+	extras.ExtendedOperation
 }
 
 func NewBurn(fact BurnFact) Burn {
-	return Burn{BaseOperation: common.NewBaseOperation(BurnHint, fact)}
+	return Burn{
+		ExtendedOperation: extras.NewExtendedOperation(BurnHint, fact),
+	}
 }

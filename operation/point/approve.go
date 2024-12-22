@@ -2,6 +2,7 @@ package point
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -102,10 +103,16 @@ func (fact ApproveFact) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
+func (fact ApproveFact) ActiveContract() []base.Address {
+	return []base.Address{fact.contract}
+}
+
 type Approve struct {
-	common.BaseOperation
+	extras.ExtendedOperation
 }
 
 func NewApprove(fact ApproveFact) Approve {
-	return Approve{BaseOperation: common.NewBaseOperation(ApproveHint, fact)}
+	return Approve{
+		ExtendedOperation: extras.NewExtendedOperation(ApproveHint, fact),
+	}
 }
