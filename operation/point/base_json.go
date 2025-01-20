@@ -2,7 +2,7 @@ package point
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -10,9 +10,9 @@ import (
 
 type PointFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
-	Sender   base.Address             `json:"sender"`
-	Contract base.Address             `json:"contract"`
-	Currency currencytypes.CurrencyID `json:"currency"`
+	Sender   base.Address      `json:"sender"`
+	Contract base.Address      `json:"contract"`
+	Currency ctypes.CurrencyID `json:"currency"`
 }
 
 func (fact PointFact) MarshalJSON() ([]byte, error) {

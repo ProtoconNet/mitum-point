@@ -5,11 +5,10 @@ import (
 	"sync"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	"github.com/ProtoconNet/mitum-currency/v3/state"
 	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
-	"github.com/ProtoconNet/mitum-currency/v3/types"
-	tstate "github.com/ProtoconNet/mitum-point/state"
-	ttype "github.com/ProtoconNet/mitum-point/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-point/state"
+	"github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -49,18 +48,18 @@ func (opp *ApprovesItemProcessor) PreProcess(
 		return e.Wrap(err)
 	}
 
-	if _, _, _, cErr := state.ExistsCAccount(opp.item.Approved(), "approved", true, false, getStateFunc); cErr != nil {
+	if _, _, _, cErr := cstate.ExistsCAccount(opp.item.Approved(), "approved", true, false, getStateFunc); cErr != nil {
 		return e.Wrap(common.ErrCAccountNA.Wrap(errors.Errorf("%v: approved %v is contract account", cErr, opp.item.Approved())))
 	}
 
-	keyGenerator := tstate.NewStateKeyGenerator(opp.item.Contract().String())
+	keyGenerator := state.NewStateKeyGenerator(opp.item.Contract().String())
 
-	if st, err := state.ExistsState(
+	if st, err := cstate.ExistsState(
 		keyGenerator.Design(), "design", getStateFunc); err != nil {
 		return e.Wrap(common.ErrServiceNF.Wrap(errors.Errorf("point design state for contract account %v",
 			opp.item.Contract(),
 		)))
-	} else if design, err := tstate.StateDesignValue(st); err != nil {
+	} else if design, err := state.StateDesignValue(st); err != nil {
 		return e.Wrap(common.ErrServiceNF.Wrap(errors.Errorf("point design state value for contract account %v",
 			opp.item.Contract(),
 		)))
@@ -74,7 +73,7 @@ func (opp *ApprovesItemProcessor) PreProcess(
 				opp.item.Approved())))
 		}
 	}
-	if err := state.CheckExistsState(keyGenerator.PointBalance(opp.sender.String()), getStateFunc); err != nil {
+	if err := cstate.CheckExistsState(keyGenerator.PointBalance(opp.sender.String()), getStateFunc); err != nil {
 		return e.Wrap(common.ErrStateNF.Wrap(errors.Errorf("point balance for sender %v in contract account %v", opp.sender, opp.item.Contract())))
 	}
 
@@ -86,22 +85,22 @@ func (opp *ApprovesItemProcessor) Process(
 ) ([]base.StateMergeValue, error) {
 	e := util.StringError("preprocess ApprovesItemProcessor")
 
-	g := tstate.NewStateKeyGenerator(opp.item.Contract().String())
+	g := state.NewStateKeyGenerator(opp.item.Contract().String())
 
 	var sts []base.StateMergeValue
 
-	smv, err := state.CreateNotExistAccount(opp.item.Approved(), getStateFunc)
+	smv, err := cstate.CreateNotExistAccount(opp.item.Approved(), getStateFunc)
 	if err != nil {
 		return nil, e.Wrap(err)
 	} else if smv != nil {
 		sts = append(sts, smv)
 	}
 
-	st, _ := state.ExistsState(g.Design(), "design", getStateFunc)
-	design, _ := tstate.StateDesignValue(st)
+	st, _ := cstate.ExistsState(g.Design(), "design", getStateFunc)
+	design, _ := state.StateDesignValue(st)
 	apb := design.Policy().GetApproveBox(opp.sender)
 	if apb == nil {
-		a := ttype.NewApproveBox(opp.sender, []ttype.ApproveInfo{ttype.NewApproveInfo(opp.item.Approved(), opp.item.Amount())})
+		a := types.NewApproveBox(opp.sender, []types.ApproveInfo{types.NewApproveInfo(opp.item.Approved(), opp.item.Amount())})
 		apb = &a
 	} else {
 		if opp.item.Amount().IsZero() {
@@ -110,7 +109,7 @@ func (opp *ApprovesItemProcessor) Process(
 				return nil, e.Wrap(errors.Errorf("remove approved, %s: %w", opp.item.Approved().String(), err))
 			}
 		} else {
-			apb.SetApproveInfo(ttype.NewApproveInfo(opp.item.Approved(), opp.item.Amount()))
+			apb.SetApproveInfo(types.NewApproveInfo(opp.item.Approved(), opp.item.Amount()))
 		}
 	}
 
@@ -119,13 +118,13 @@ func (opp *ApprovesItemProcessor) Process(
 	if err := policy.IsValid(nil); err != nil {
 		return nil, ErrInvalid(policy, err)
 	}
-	de := ttype.NewDesign(design.Symbol(), design.Name(), design.Decimal(), policy)
+	de := types.NewDesign(design.Symbol(), design.Name(), design.Decimal(), policy)
 	if err := de.IsValid(nil); err != nil {
 		return nil, ErrInvalid(de, err)
 	}
 	sts = append(sts, cstate.NewStateMergeValue(
 		g.Design(),
-		tstate.NewDesignStateValue(de),
+		state.NewDesignStateValue(de),
 	))
 
 	return sts, nil
@@ -142,7 +141,7 @@ type ApprovesProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewApprovesProcessor() types.GetNewProcessor {
+func NewApprovesProcessor() ctypes.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,

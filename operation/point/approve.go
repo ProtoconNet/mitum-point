@@ -3,7 +3,7 @@ package point
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -25,7 +25,7 @@ type ApproveFact struct {
 func NewApproveFact(
 	token []byte,
 	sender, contract base.Address,
-	currency currencytypes.CurrencyID,
+	currency ctypes.CurrencyID,
 	approved base.Address,
 	amount common.Big,
 ) ApproveFact {

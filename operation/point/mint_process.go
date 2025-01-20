@@ -3,15 +3,14 @@ package point
 import (
 	"context"
 	"fmt"
-	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"sync"
 
+	"github.com/ProtoconNet/mitum-currency/v3/common"
+	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum-point/utils"
-
-	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -33,7 +32,7 @@ type MintProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewMintProcessor() currencytypes.GetNewProcessor {
+func NewMintProcessor() ctypes.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
@@ -78,13 +77,13 @@ func (opp *MintProcessor) PreProcess(
 				Errorf("%v", err)), nil
 	}
 
-	_, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
+	_, err := cstate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("curnency id %v", fact.Currency())), nil
 	}
 
-	if _, _, _, cErr := currencystate.ExistsCAccount(
+	if _, _, _, cErr := cstate.ExistsCAccount(
 		fact.Receiver(), "receiver", true, false, getStateFunc); cErr != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
@@ -93,7 +92,7 @@ func (opp *MintProcessor) PreProcess(
 
 	keyGenerator := state.NewStateKeyGenerator(fact.Contract().String())
 
-	if st, err := currencystate.ExistsState(keyGenerator.Design(), "design", getStateFunc); err != nil {
+	if st, err := cstate.ExistsState(keyGenerator.Design(), "design", getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMServiceNF).Errorf("point design state for contract account %v",
@@ -120,7 +119,7 @@ func (opp *MintProcessor) Process(
 
 	var sts []base.StateMergeValue
 
-	st, _ := currencystate.ExistsState(g.Design(), "design", getStateFunc)
+	st, _ := cstate.ExistsState(g.Design(), "design", getStateFunc)
 	design, _ := state.StateDesignValue(st)
 
 	policy := types.NewPolicy(
@@ -136,12 +135,12 @@ func (opp *MintProcessor) Process(
 		return nil, ErrInvalid(de, err), nil
 	}
 
-	sts = append(sts, currencystate.NewStateMergeValue(
+	sts = append(sts, cstate.NewStateMergeValue(
 		g.Design(),
 		state.NewDesignStateValue(de),
 	))
 
-	smv, err := currencystate.CreateNotExistAccount(fact.Receiver(), getStateFunc)
+	smv, err := cstate.CreateNotExistAccount(fact.Receiver(), getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("%w", err), nil
 	} else if smv != nil {

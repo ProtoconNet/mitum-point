@@ -3,7 +3,7 @@ package point
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -28,7 +28,7 @@ type RegisterModelFact struct {
 func NewRegisterModelFact(
 	token []byte,
 	sender, contract base.Address,
-	currency currencytypes.CurrencyID,
+	currency ctypes.CurrencyID,
 	symbol types.PointSymbol,
 	name string,
 	decimal common.Big,

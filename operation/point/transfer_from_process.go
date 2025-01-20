@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/ProtoconNet/mitum-currency/v3/common"
+	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum-point/utils"
-
-	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -33,7 +32,7 @@ type TransferFromProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewTransferFromProcessor() currencytypes.GetNewProcessor {
+func NewTransferFromProcessor() ctypes.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
@@ -78,20 +77,20 @@ func (opp *TransferFromProcessor) PreProcess(
 				Errorf("%v", err)), nil
 	}
 
-	_, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
+	_, err := cstate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id %v", fact.Currency())), nil
 	}
 
-	if _, _, _, cErr := currencystate.ExistsCAccount(
+	if _, _, _, cErr := cstate.ExistsCAccount(
 		fact.Receiver(), "receiver", true, false, getStateFunc); cErr != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
 				Errorf("%v: receiver %v is contract account", cErr, fact.Receiver())), nil
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(
+	if _, _, aErr, cErr := cstate.ExistsCAccount(
 		fact.Target(), "target", true, false, getStateFunc); aErr != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
@@ -104,7 +103,7 @@ func (opp *TransferFromProcessor) PreProcess(
 
 	g := state.NewStateKeyGenerator(fact.Contract().String())
 
-	st, err := currencystate.ExistsState(g.Design(), "design", getStateFunc)
+	st, err := cstate.ExistsState(g.Design(), "design", getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
@@ -152,7 +151,7 @@ func (opp *TransferFromProcessor) PreProcess(
 					fact.Sender(), fact.Contract(), aprInfo.Amount(), fact.Amount())), nil
 	}
 
-	st, err = currencystate.ExistsState(g.PointBalance(fact.Target().String()), "point balance", getStateFunc)
+	st, err = cstate.ExistsState(g.PointBalance(fact.Target().String()), "point balance", getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMStateNF).
@@ -188,7 +187,7 @@ func (opp *TransferFromProcessor) Process(
 
 	var sts []base.StateMergeValue
 
-	st, _ := currencystate.ExistsState(g.Design(), "design", getStateFunc)
+	st, _ := cstate.ExistsState(g.Design(), "design", getStateFunc)
 	design, _ := state.StateDesignValue(st)
 
 	approveBoxList := design.Policy().ApproveList()
@@ -225,12 +224,12 @@ func (opp *TransferFromProcessor) Process(
 		return nil, ErrInvalid(de, err), nil
 	}
 
-	sts = append(sts, currencystate.NewStateMergeValue(
+	sts = append(sts, cstate.NewStateMergeValue(
 		g.Design(),
 		state.NewDesignStateValue(de),
 	))
 
-	st, err := currencystate.ExistsState(g.PointBalance(fact.Target().String()), "point balance", getStateFunc)
+	st, err := cstate.ExistsState(g.PointBalance(fact.Target().String()), "point balance", getStateFunc)
 	if err != nil {
 		return nil, ErrStateNotFound("point balance", utils.JoinStringers(fact.Contract(), fact.Target()), err), nil
 	}
@@ -248,7 +247,7 @@ func (opp *TransferFromProcessor) Process(
 		},
 	))
 
-	smv, err := currencystate.CreateNotExistAccount(fact.Receiver(), getStateFunc)
+	smv, err := cstate.CreateNotExistAccount(fact.Receiver(), getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("%w", err), nil
 	} else if smv != nil {

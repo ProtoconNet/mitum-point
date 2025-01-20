@@ -3,16 +3,15 @@ package point
 import (
 	"context"
 	"fmt"
-	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"sync"
 
+	"github.com/ProtoconNet/mitum-currency/v3/common"
+	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
+	ceststat "github.com/ProtoconNet/mitum-currency/v3/state/extension"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum-point/utils"
-
-	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
-	extstate "github.com/ProtoconNet/mitum-currency/v3/state/extension"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -34,7 +33,7 @@ type RegisterModelProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewRegisterModelProcessor() currencytypes.GetNewProcessor {
+func NewRegisterModelProcessor() ctypes.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
@@ -79,7 +78,7 @@ func (opp *RegisterModelProcessor) PreProcess(
 				Errorf("%v", err)), nil
 	}
 
-	_, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
+	_, err := cstate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id %v", fact.Currency())), nil
@@ -87,7 +86,7 @@ func (opp *RegisterModelProcessor) PreProcess(
 
 	g := state.NewStateKeyGenerator(fact.Contract().String())
 
-	if found, _ := currencystate.CheckNotExistsState(g.Design(), getStateFunc); found {
+	if found, _ := cstate.CheckNotExistsState(g.Design(), getStateFunc); found {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMServiceE).Errorf("point design for contract account %v", fact.Contract())), nil
@@ -121,25 +120,25 @@ func (opp *RegisterModelProcessor) Process(
 		return nil, ErrInvalid(design, err), nil
 	}
 
-	sts = append(sts, currencystate.NewStateMergeValue(
+	sts = append(sts, cstate.NewStateMergeValue(
 		g.Design(),
 		state.NewDesignStateValue(design),
 	))
 
-	st, err := currencystate.ExistsState(extstate.StateKeyContractAccount(fact.Contract()), "contract account", getStateFunc)
+	st, err := cstate.ExistsState(ceststat.StateKeyContractAccount(fact.Contract()), "contract account", getStateFunc)
 	if err != nil {
 		return nil, ErrStateNotFound("contract", fact.Contract().String(), err), nil
 	}
 
-	ca, err := extstate.StateContractAccountValue(st)
+	ca, err := ceststat.StateContractAccountValue(st)
 	if err != nil {
 		return nil, ErrStateNotFound("contract value", fact.Contract().String(), err), nil
 	}
 	nca := ca.SetIsActive(true)
 
-	sts = append(sts, currencystate.NewStateMergeValue(
-		extstate.StateKeyContractAccount(fact.Contract()),
-		extstate.NewContractAccountStateValue(nca),
+	sts = append(sts, cstate.NewStateMergeValue(
+		ceststat.StateKeyContractAccount(fact.Contract()),
+		ceststat.NewContractAccountStateValue(nca),
 	))
 
 	if fact.InitialSupply().OverZero() {

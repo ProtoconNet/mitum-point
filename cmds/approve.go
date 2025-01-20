@@ -2,20 +2,19 @@ package cmds
 
 import (
 	"context"
+
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum-point/operation/point"
-
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum-point/utils"
-	"github.com/pkg/errors"
-
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
+	"github.com/pkg/errors"
 )
 
 type ApproveCommand struct {
 	OperationCommand
-	Approved currencycmds.AddressFlag `arg:"" name:"approved" help:"approved account" required:"true"`
-	Amount   currencycmds.BigFlag     `arg:"" name:"amount" help:"amount to approve" required:"true"`
+	Approved ccmds.AddressFlag `arg:"" name:"approved" help:"approved account" required:"true"`
+	Amount   ccmds.BigFlag     `arg:"" name:"amount" help:"amount to approve" required:"true"`
 	approved base.Address
 }
 
@@ -33,7 +32,7 @@ func (cmd *ApproveCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	currencycmds.PrettyPrint(cmd.Out, op)
+	ccmds.PrettyPrint(cmd.Out, op)
 
 	return nil
 }

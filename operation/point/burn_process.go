@@ -3,15 +3,14 @@ package point
 import (
 	"context"
 	"fmt"
-	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"sync"
 
+	"github.com/ProtoconNet/mitum-currency/v3/common"
+	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum-point/types"
 	"github.com/ProtoconNet/mitum-point/utils"
-
-	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -33,7 +32,7 @@ type BurnProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewBurnProcessor() currencytypes.GetNewProcessor {
+func NewBurnProcessor() ctypes.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
@@ -78,7 +77,7 @@ func (opp *BurnProcessor) PreProcess(
 				Errorf("%v", err)), nil
 	}
 
-	_, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
+	_, err := cstate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id %v", fact.Currency())), nil
@@ -92,13 +91,13 @@ func (opp *BurnProcessor) PreProcess(
 
 	g := state.NewStateKeyGenerator(fact.Contract().String())
 
-	if err := currencystate.CheckExistsState(g.Design(), getStateFunc); err != nil {
+	if err := cstate.CheckExistsState(g.Design(), getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
 				Errorf("point design for contract account %v", fact.Contract())), nil
 	}
 
-	st, err := currencystate.ExistsState(g.PointBalance(fact.Target().String()), "point balance", getStateFunc)
+	st, err := cstate.ExistsState(g.PointBalance(fact.Target().String()), "point balance", getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMStateNF).
@@ -132,7 +131,7 @@ func (opp *BurnProcessor) Process(
 
 	var sts []base.StateMergeValue
 
-	st, _ := currencystate.ExistsState(g.Design(), "design", getStateFunc)
+	st, _ := cstate.ExistsState(g.Design(), "design", getStateFunc)
 	design, _ := state.StateDesignValue(st)
 
 	policy := types.NewPolicy(
@@ -148,12 +147,12 @@ func (opp *BurnProcessor) Process(
 		return nil, ErrInvalid(de, err), nil
 	}
 
-	sts = append(sts, currencystate.NewStateMergeValue(
+	sts = append(sts, cstate.NewStateMergeValue(
 		g.Design(),
 		state.NewDesignStateValue(de),
 	))
 
-	st, err := currencystate.ExistsState(g.PointBalance(fact.Target().String()), "point balance", getStateFunc)
+	st, err := cstate.ExistsState(g.PointBalance(fact.Target().String()), "point balance", getStateFunc)
 	if err != nil {
 		return nil, ErrBaseOperationProcess(err, "point balance not found, %s, %s", fact.Contract(), fact.Target()), nil
 	}

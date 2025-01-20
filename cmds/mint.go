@@ -4,18 +4,17 @@ import (
 	"context"
 	"github.com/ProtoconNet/mitum-point/operation/point"
 
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum-point/utils"
-	"github.com/pkg/errors"
-
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
+	"github.com/pkg/errors"
 )
 
 type MintCommand struct {
 	OperationCommand
-	Receiver currencycmds.AddressFlag `arg:"" name:"receiver" help:"point receiver" required:"true"`
-	Amount   currencycmds.BigFlag     `arg:"" name:"amount" help:"amount to mint" required:"true"`
+	Receiver ccmds.AddressFlag `arg:"" name:"receiver" help:"point receiver" required:"true"`
+	Amount   ccmds.BigFlag     `arg:"" name:"amount" help:"amount to mint" required:"true"`
 	receiver base.Address
 }
 
@@ -33,7 +32,7 @@ func (cmd *MintCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	currencycmds.PrettyPrint(cmd.Out, op)
+	ccmds.PrettyPrint(cmd.Out, op)
 
 	return nil
 }

@@ -3,14 +3,15 @@ package point
 import (
 	"context"
 	"fmt"
+	"sync"
+
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	"github.com/ProtoconNet/mitum-currency/v3/state"
+	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	tstate "github.com/ProtoconNet/mitum-point/state"
+	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
-	"sync"
 )
 
 var transfersItemProcessorPool = sync.Pool{
@@ -47,12 +48,12 @@ func (opp *TransfersItemProcessor) PreProcess(
 		return e.Wrap(err)
 	}
 
-	_, err := state.ExistsCurrencyPolicy(opp.item.Currency(), getStateFunc)
+	_, err := cstate.ExistsCurrencyPolicy(opp.item.Currency(), getStateFunc)
 	if err != nil {
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", opp.item.Currency())))
 	}
 
-	if _, _, _, cErr := state.ExistsCAccount(opp.item.Receiver(), "receiver", true, false, getStateFunc); cErr != nil {
+	if _, _, _, cErr := cstate.ExistsCAccount(opp.item.Receiver(), "receiver", true, false, getStateFunc); cErr != nil {
 		return e.Wrap(common.ErrCAccountNA.Wrap(errors.Errorf("%v: receiver %v is contract account", cErr, opp.item.Receiver())))
 	}
 
@@ -64,11 +65,11 @@ func (opp *TransfersItemProcessor) Process(
 ) ([]base.StateMergeValue, error) {
 	e := util.StringError("preprocess TransfersItemProcessor")
 
-	g := tstate.NewStateKeyGenerator(opp.item.Contract().String())
+	g := state.NewStateKeyGenerator(opp.item.Contract().String())
 	var sts []base.StateMergeValue
 	receiver := opp.item.Receiver()
 	amount := opp.item.Amount()
-	smv, err := state.CreateNotExistAccount(receiver, getStateFunc)
+	smv, err := cstate.CreateNotExistAccount(receiver, getStateFunc)
 	if err != nil {
 		return nil, e.Wrap(err)
 	} else if smv != nil {
@@ -79,7 +80,7 @@ func (opp *TransfersItemProcessor) Process(
 	case err != nil:
 		return nil, e.Wrap(err)
 	case found:
-		_, err := tstate.StatePointBalanceValue(st)
+		_, err := state.StatePointBalanceValue(st)
 		if err != nil {
 			return nil, e.Wrap(err)
 		}
@@ -87,9 +88,9 @@ func (opp *TransfersItemProcessor) Process(
 
 	sts = append(sts, common.NewBaseStateMergeValue(
 		g.PointBalance(receiver.String()),
-		tstate.NewAddPointBalanceStateValue(amount),
+		state.NewAddPointBalanceStateValue(amount),
 		func(height base.Height, st base.State) base.StateValueMerger {
-			return tstate.NewPointBalanceStateValueMerger(height, g.PointBalance(receiver.String()), st)
+			return state.NewPointBalanceStateValueMerger(height, g.PointBalance(receiver.String()), st)
 		},
 	))
 
@@ -156,9 +157,9 @@ func (opp *TransfersProcessor) PreProcess(
 		}
 	}
 	for ca, am := range required {
-		g := tstate.NewStateKeyGenerator(ca)
+		g := state.NewStateKeyGenerator(ca)
 
-		if err := state.CheckExistsState(g.Design(), getStateFunc); err != nil {
+		if err := cstate.CheckExistsState(g.Design(), getStateFunc); err != nil {
 			return nil, base.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.
 					Wrap(common.ErrMServiceNF).Errorf("point design for contract account %v",
@@ -166,14 +167,14 @@ func (opp *TransfersProcessor) PreProcess(
 				)), nil
 		}
 
-		st, err := state.ExistsState(g.PointBalance(fact.Sender().String()), "point balance", getStateFunc)
+		st, err := cstate.ExistsState(g.PointBalance(fact.Sender().String()), "point balance", getStateFunc)
 		if err != nil {
 			return nil, base.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.Wrap(common.ErrMStateNF).
 					Errorf("point balance of sender %v in contract account %v", fact.Sender(), ca)), nil
 		}
 
-		tb, err := tstate.StatePointBalanceValue(st)
+		tb, err := state.StatePointBalanceValue(st)
 		if err != nil {
 			return nil, base.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.Wrap(common.ErrMStateValInvalid).
@@ -290,9 +291,9 @@ func (opp *TransfersProcessor) Process( // nolint:dupl
 			stateMergeValues,
 			common.NewBaseStateMergeValue(
 				key,
-				tstate.NewDeductPointBalanceStateValue(total),
+				state.NewDeductPointBalanceStateValue(total),
 				func(height base.Height, st base.State) base.StateValueMerger {
-					return tstate.NewPointBalanceStateValueMerger(height, key, st)
+					return state.NewPointBalanceStateValueMerger(height, key, st)
 				}),
 		)
 	}
@@ -314,8 +315,8 @@ func PrepareSenderTotalAmounts(
 	totalAmounts := map[string]common.Big{}
 
 	for ca, rq := range required {
-		g := tstate.NewStateKeyGenerator(ca)
-		_, err := state.ExistsState(g.PointBalance(holder.String()), fmt.Sprintf("point balance, %v", holder), getStateFunc)
+		g := state.NewStateKeyGenerator(ca)
+		_, err := cstate.ExistsState(g.PointBalance(holder.String()), fmt.Sprintf("point balance, %v", holder), getStateFunc)
 		if err != nil {
 			return nil, err
 		}
