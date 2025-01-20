@@ -3,21 +3,19 @@ package state
 import (
 	"fmt"
 	"strings"
-
-	"github.com/ProtoconNet/mitum2/base"
 )
 
 var PointPrefix = "point"
 
-func StateKeyPointPrefix(contract base.Address) string {
+func StateKeyPointPrefix(contract string) string {
 	return fmt.Sprintf("%s:%s", PointPrefix, contract)
 }
 
 type StateKeyGenerator struct {
-	contract base.Address
+	contract string
 }
 
-func NewStateKeyGenerator(contract base.Address) StateKeyGenerator {
+func NewStateKeyGenerator(contract string) StateKeyGenerator {
 	return StateKeyGenerator{
 		contract,
 	}
@@ -27,7 +25,7 @@ func (g StateKeyGenerator) Design() string {
 	return StateKeyDesign(g.contract)
 }
 
-func (g StateKeyGenerator) PointBalance(address base.Address) string {
+func (g StateKeyGenerator) PointBalance(address string) string {
 	return StateKeyPointBalance(g.contract, address)
 }
 

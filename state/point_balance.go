@@ -114,6 +114,6 @@ func (b DeductPointBalanceStateValue) HashBytes() []byte {
 	return b.Amount.Bytes()
 }
 
-func StateKeyPointBalance(contract base.Address, address base.Address) string {
+func StateKeyPointBalance(contract string, address string) string {
 	return fmt.Sprintf("%s:%s:%s", StateKeyPointPrefix(contract), address, PointBalanceSuffix)
 }

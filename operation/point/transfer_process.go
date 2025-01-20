@@ -89,7 +89,7 @@ func (opp *TransferProcessor) PreProcess(
 				Errorf("%v: receiver %v is contract account", cErr, fact.Receiver())), nil
 	}
 
-	g := state.NewStateKeyGenerator(fact.Contract())
+	g := state.NewStateKeyGenerator(fact.Contract().String())
 
 	if err := currencystate.CheckExistsState(g.Design(), getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
@@ -99,7 +99,7 @@ func (opp *TransferProcessor) PreProcess(
 			)), nil
 	}
 
-	st, err := currencystate.ExistsState(g.PointBalance(fact.Sender()), "point balance", getStateFunc)
+	st, err := currencystate.ExistsState(g.PointBalance(fact.Sender().String()), "point balance", getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMStateNF).
@@ -129,15 +129,15 @@ func (opp *TransferProcessor) Process(
 ) {
 	fact, _ := op.Fact().(TransferFact)
 
-	g := state.NewStateKeyGenerator(fact.Contract())
+	g := state.NewStateKeyGenerator(fact.Contract().String())
 
 	var sts []base.StateMergeValue
 
 	sts = append(sts, common.NewBaseStateMergeValue(
-		g.PointBalance(fact.Sender()),
+		g.PointBalance(fact.Sender().String()),
 		state.NewDeductPointBalanceStateValue(fact.Amount()),
 		func(height base.Height, st base.State) base.StateValueMerger {
-			return state.NewPointBalanceStateValueMerger(height, g.PointBalance(fact.Sender()), st)
+			return state.NewPointBalanceStateValueMerger(height, g.PointBalance(fact.Sender().String()), st)
 		},
 	))
 
@@ -148,7 +148,7 @@ func (opp *TransferProcessor) Process(
 		sts = append(sts, smv)
 	}
 
-	switch st, found, err := getStateFunc(g.PointBalance(fact.Receiver())); {
+	switch st, found, err := getStateFunc(g.PointBalance(fact.Receiver().String())); {
 	case err != nil:
 		return nil, ErrBaseOperationProcess(err, "failed to check point balance, %s, %s", fact.Contract(), fact.Receiver()), nil
 	case found:
@@ -159,10 +159,10 @@ func (opp *TransferProcessor) Process(
 	}
 
 	sts = append(sts, common.NewBaseStateMergeValue(
-		g.PointBalance(fact.Receiver()),
+		g.PointBalance(fact.Receiver().String()),
 		state.NewAddPointBalanceStateValue(fact.Amount()),
 		func(height base.Height, st base.State) base.StateValueMerger {
-			return state.NewPointBalanceStateValueMerger(height, g.PointBalance(fact.Receiver()), st)
+			return state.NewPointBalanceStateValueMerger(height, g.PointBalance(fact.Receiver().String()), st)
 		},
 	))
 

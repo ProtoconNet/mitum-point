@@ -90,7 +90,7 @@ func (opp *BurnProcessor) PreProcess(
 				Errorf("target %v is not point owner in contract account %v", fact.Target(), fact.Contract())), nil
 	}
 
-	g := state.NewStateKeyGenerator(fact.Contract())
+	g := state.NewStateKeyGenerator(fact.Contract().String())
 
 	if err := currencystate.CheckExistsState(g.Design(), getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
@@ -98,7 +98,7 @@ func (opp *BurnProcessor) PreProcess(
 				Errorf("point design for contract account %v", fact.Contract())), nil
 	}
 
-	st, err := currencystate.ExistsState(g.PointBalance(fact.Target()), "point balance", getStateFunc)
+	st, err := currencystate.ExistsState(g.PointBalance(fact.Target().String()), "point balance", getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMStateNF).
@@ -128,7 +128,7 @@ func (opp *BurnProcessor) Process(
 ) {
 	fact, _ := op.Fact().(BurnFact)
 
-	g := state.NewStateKeyGenerator(fact.Contract())
+	g := state.NewStateKeyGenerator(fact.Contract().String())
 
 	var sts []base.StateMergeValue
 
@@ -153,7 +153,7 @@ func (opp *BurnProcessor) Process(
 		state.NewDesignStateValue(de),
 	))
 
-	st, err := currencystate.ExistsState(g.PointBalance(fact.Target()), "point balance", getStateFunc)
+	st, err := currencystate.ExistsState(g.PointBalance(fact.Target().String()), "point balance", getStateFunc)
 	if err != nil {
 		return nil, ErrBaseOperationProcess(err, "point balance not found, %s, %s", fact.Contract(), fact.Target()), nil
 	}
@@ -164,10 +164,10 @@ func (opp *BurnProcessor) Process(
 	}
 
 	sts = append(sts, common.NewBaseStateMergeValue(
-		g.PointBalance(fact.Target()),
+		g.PointBalance(fact.Target().String()),
 		state.NewDeductPointBalanceStateValue(fact.Amount()),
 		func(height base.Height, st base.State) base.StateValueMerger {
-			return state.NewPointBalanceStateValueMerger(height, g.PointBalance(fact.Target()), st)
+			return state.NewPointBalanceStateValueMerger(height, g.PointBalance(fact.Target().String()), st)
 		},
 	))
 

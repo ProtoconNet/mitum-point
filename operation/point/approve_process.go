@@ -92,7 +92,7 @@ func (opp *ApproveProcessor) PreProcess(
 				Errorf("%v: approved %v is contract account", cErr, fact.Approved())), nil
 	}
 
-	keyGenerator := state.NewStateKeyGenerator(fact.Contract())
+	keyGenerator := state.NewStateKeyGenerator(fact.Contract().String())
 
 	if st, err := currencystate.ExistsState(keyGenerator.Design(), "design", getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
@@ -120,7 +120,7 @@ func (opp *ApproveProcessor) PreProcess(
 						fact.Approved())), nil
 		}
 	}
-	if err := currencystate.CheckExistsState(keyGenerator.PointBalance(fact.Sender()), getStateFunc); err != nil {
+	if err := currencystate.CheckExistsState(keyGenerator.PointBalance(fact.Sender().String()), getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMStateNF).
 				Errorf("point balance for sender %v in contract account %v", fact.Sender(), fact.Contract())), nil
@@ -135,7 +135,7 @@ func (opp *ApproveProcessor) Process(
 ) {
 	fact, _ := op.Fact().(ApproveFact)
 
-	keyGenerator := state.NewStateKeyGenerator(fact.Contract())
+	keyGenerator := state.NewStateKeyGenerator(fact.Contract().String())
 
 	var sts []base.StateMergeValue
 

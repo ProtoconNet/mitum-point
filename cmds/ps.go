@@ -52,8 +52,11 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		{point.MintHint, point.NewMintProcessor()},
 		{point.BurnHint, point.NewBurnProcessor()},
 		{point.ApproveHint, point.NewApproveProcessor()},
+		{point.ApprovesHint, point.NewApprovesProcessor()},
 		{point.TransferHint, point.NewTransferProcessor()},
+		{point.TransfersHint, point.NewTransfersProcessor()},
 		{point.TransferFromHint, point.NewTransferFromProcessor()},
+		{point.TransfersFromHint, point.NewTransfersFromProcessor()},
 	}
 
 	for _, p := range pcs {
