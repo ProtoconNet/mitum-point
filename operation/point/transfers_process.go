@@ -48,11 +48,6 @@ func (opp *TransfersItemProcessor) PreProcess(
 		return e.Wrap(err)
 	}
 
-	_, err := cstate.ExistsCurrencyPolicy(opp.item.Currency(), getStateFunc)
-	if err != nil {
-		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", opp.item.Currency())))
-	}
-
 	if _, _, _, cErr := cstate.ExistsCAccount(opp.item.Receiver(), "receiver", true, false, getStateFunc); cErr != nil {
 		return e.Wrap(common.ErrCAccountNA.Wrap(errors.Errorf("%v: receiver %v is contract account", cErr, opp.item.Receiver())))
 	}
@@ -106,7 +101,7 @@ func (opp *TransfersItemProcessor) Close() {
 
 type TransfersProcessor struct {
 	*base.BaseOperationProcessor
-	required map[string]common.Big
+	//required map[string]common.Big
 }
 
 func NewTransfersProcessor() types.GetNewProcessor {
@@ -131,7 +126,6 @@ func NewTransfersProcessor() types.GetNewProcessor {
 		}
 
 		opp.BaseOperationProcessor = b
-		opp.required = nil
 
 		return opp, nil
 	}
@@ -147,52 +141,24 @@ func (opp *TransfersProcessor) PreProcess(
 		), nil
 	}
 
-	var required = make(map[string]common.Big)
+	required := make(map[string]common.Big)
 	for i := range fact.Items() {
 		v, found := required[fact.Items()[i].contract.String()]
 		if !found {
-			required[fact.Items()[i].contract.String()] = fact.Items()[i].amount
+			required[fact.Items()[i].contract.String()] = fact.Items()[i].Amount()
 		} else {
-			required[fact.Items()[i].contract.String()] = v.Add(fact.Items()[i].amount)
+			required[fact.Items()[i].contract.String()] = v.Add(fact.Items()[i].Amount())
 		}
 	}
-	for ca, am := range required {
-		g := state.NewStateKeyGenerator(ca)
 
-		if err := cstate.CheckExistsState(g.Design(), getStateFunc); err != nil {
-			return nil, base.NewBaseOperationProcessReasonError(
-				common.ErrMPreProcess.
-					Wrap(common.ErrMServiceNF).Errorf("point design for contract account %v",
-					ca,
-				)), nil
-		}
-
-		st, err := cstate.ExistsState(g.PointBalance(fact.Sender().String()), "point balance", getStateFunc)
-		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError(
-				common.ErrMPreProcess.Wrap(common.ErrMStateNF).
-					Errorf("point balance of sender %v in contract account %v", fact.Sender(), ca)), nil
-		}
-
-		tb, err := state.StatePointBalanceValue(st)
-		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError(
-				common.ErrMPreProcess.Wrap(common.ErrMStateValInvalid).
-					Errorf("point balance of sender %v in contract account %v", fact.Sender(), ca)), nil
-		}
-
-		if tb.Compare(am) < 0 {
-			return nil, base.NewBaseOperationProcessReasonError(
-				common.ErrMPreProcess.Wrap(common.ErrMValueInvalid).
-					Errorf("point balance of sender %v is less than amount to transfer in contract account %v, %v < %v",
-						fact.Sender(), ca, tb, am)), nil
-		}
+	_, err := PrepareSenderTotalAmounts(fact.Sender().String(), required, getStateFunc)
+	if err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("process Transfers; %w", err), nil
 	}
-	opp.required = required
 
 	var wg sync.WaitGroup
-	errChan := make(chan *base.BaseOperationProcessReasonError, len(fact.items))
-	for i := range fact.items {
+	errChan := make(chan *base.BaseOperationProcessReasonError, len(fact.Items()))
+	for i := range fact.Items() {
 		wg.Add(1)
 		go func(item TransfersItem) {
 			defer wg.Done()
@@ -215,7 +181,7 @@ func (opp *TransfersProcessor) PreProcess(
 				return
 			}
 			t.Close()
-		}(fact.items[i])
+		}(fact.Items()[i])
 	}
 	go func() {
 		wg.Wait()
@@ -243,8 +209,8 @@ func (opp *TransfersProcessor) Process( // nolint:dupl
 	var stateMergeValues []base.StateMergeValue // nolint:prealloc
 	var wg sync.WaitGroup
 	var mu sync.Mutex
-	errChan := make(chan *base.BaseOperationProcessReasonError, len(fact.items))
-	for i := range fact.items {
+	errChan := make(chan *base.BaseOperationProcessReasonError, len(fact.Items()))
+	for i := range fact.Items() {
 		wg.Add(1)
 		go func(item TransfersItem) {
 			defer wg.Done()
@@ -269,7 +235,7 @@ func (opp *TransfersProcessor) Process( // nolint:dupl
 			stateMergeValues = append(stateMergeValues, s...)
 			mu.Unlock()
 			c.Close()
-		}(fact.items[i])
+		}(fact.Items()[i])
 	}
 	go func() {
 		wg.Wait()
@@ -281,10 +247,16 @@ func (opp *TransfersProcessor) Process( // nolint:dupl
 		}
 	}
 
-	totalAmounts, err := PrepareSenderTotalAmounts(fact.Sender(), opp.required, getStateFunc)
-	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("process Transfers; %w", err), nil
+	required := make(map[string]common.Big)
+	for i := range fact.Items() {
+		v, found := required[fact.Items()[i].contract.String()]
+		if !found {
+			required[fact.Items()[i].contract.String()] = fact.Items()[i].amount
+		} else {
+			required[fact.Items()[i].contract.String()] = v.Add(fact.Items()[i].amount)
+		}
 	}
+	totalAmounts, _ := PrepareSenderTotalAmounts(fact.Sender().String(), required, getStateFunc)
 
 	for key, total := range totalAmounts {
 		stateMergeValues = append(
@@ -308,7 +280,7 @@ func (opp *TransfersProcessor) Close() error {
 }
 
 func PrepareSenderTotalAmounts(
-	holder base.Address,
+	holder string,
 	required map[string]common.Big,
 	getStateFunc base.GetStateFunc,
 ) (map[string]common.Big, error) {
@@ -316,12 +288,24 @@ func PrepareSenderTotalAmounts(
 
 	for ca, rq := range required {
 		g := state.NewStateKeyGenerator(ca)
-		_, err := cstate.ExistsState(g.PointBalance(holder.String()), fmt.Sprintf("point balance, %v", holder), getStateFunc)
+		if err := cstate.CheckExistsState(g.Design(), getStateFunc); err != nil {
+			return nil, common.ErrServiceNF.Wrap(errors.Errorf("point design for contract account %v", ca))
+		}
+
+		st, err := cstate.ExistsState(g.PointBalance(holder), fmt.Sprintf("point balance, %s", holder), getStateFunc)
 		if err != nil {
 			return nil, err
 		}
 
-		totalAmounts[g.PointBalance(holder.String())] = rq
+		am, err := state.StatePointBalanceValue(st)
+		if err != nil {
+			return nil, err
+		}
+		if am.Compare(rq) < 0 {
+			return nil, errors.Errorf("point balance of holder %s is less than amount to transfer in contract account %s, %v < %v", holder, ca, am, rq)
+		}
+
+		totalAmounts[g.PointBalance(holder)] = rq
 	}
 
 	return totalAmounts, nil
