@@ -134,7 +134,7 @@ func (opp *RegisterModelProcessor) Process(
 	if err != nil {
 		return nil, ErrStateNotFound("contract value", fact.Contract().String(), err), nil
 	}
-	nca := ca.SetIsActive(true)
+	nca := ca.SetActive(true)
 
 	sts = append(sts, cstate.NewStateMergeValue(
 		ceststat.StateKeyContractAccount(fact.Contract()),
