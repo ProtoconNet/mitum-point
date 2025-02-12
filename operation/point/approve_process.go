@@ -96,13 +96,13 @@ func (opp *ApproveProcessor) PreProcess(
 	if st, err := cstate.ExistsState(keyGenerator.Design(), "design", getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceNF).Errorf("point design state for contract account %v",
+				Wrap(common.ErrMServiceNF).Errorf("point service state for contract account %v",
 				fact.Contract(),
 			)), nil
 	} else if design, err := state.StateDesignValue(st); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceNF).Errorf("point design state value for contract account %v",
+				Wrap(common.ErrMServiceNF).Errorf("point service state value for contract account %v",
 				fact.Contract(),
 			)), nil
 	} else if apb := design.Policy().GetApproveBox(fact.Sender()); apb == nil {

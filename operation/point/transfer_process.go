@@ -93,7 +93,7 @@ func (opp *TransferProcessor) PreProcess(
 	if err := cstate.CheckExistsState(g.Design(), getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMStateNF).
-				Wrap(common.ErrMServiceNF).Errorf("point design for contract account %v",
+				Wrap(common.ErrMServiceNF).Errorf("point service state for contract account %v",
 				fact.Contract(),
 			)), nil
 	}

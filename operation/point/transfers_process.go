@@ -289,7 +289,7 @@ func PrepareSenderTotalAmounts(
 	for ca, rq := range required {
 		g := state.NewStateKeyGenerator(ca)
 		if err := cstate.CheckExistsState(g.Design(), getStateFunc); err != nil {
-			return nil, common.ErrServiceNF.Wrap(errors.Errorf("point design for contract account %v", ca))
+			return nil, common.ErrServiceNF.Wrap(errors.Errorf("point service state for contract account %v", ca))
 		}
 
 		st, err := cstate.ExistsState(g.PointBalance(holder), fmt.Sprintf("point balance, %s", holder), getStateFunc)

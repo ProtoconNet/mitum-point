@@ -94,7 +94,7 @@ func (opp *BurnProcessor) PreProcess(
 	if err := cstate.CheckExistsState(g.Design(), getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
-				Errorf("point design for contract account %v", fact.Contract())), nil
+				Errorf("point service state for contract account %v", fact.Contract())), nil
 	}
 
 	st, err := cstate.ExistsState(g.PointBalance(fact.Target().String()), "point balance", getStateFunc)

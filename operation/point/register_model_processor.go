@@ -89,7 +89,7 @@ func (opp *RegisterModelProcessor) PreProcess(
 	if found, _ := cstate.CheckNotExistsState(g.Design(), getStateFunc); found {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceE).Errorf("point design for contract account %v", fact.Contract())), nil
+				Wrap(common.ErrMServiceE).Errorf("point service state for contract account %v", fact.Contract())), nil
 	}
 
 	return ctx, nil, nil

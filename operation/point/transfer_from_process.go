@@ -107,7 +107,7 @@ func (opp *TransferFromProcessor) PreProcess(
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceNF).Errorf("point design state for contract account %v",
+				Wrap(common.ErrMServiceNF).Errorf("point service state for contract account %v",
 				fact.Contract(),
 			)), nil
 	}
@@ -116,7 +116,7 @@ func (opp *TransferFromProcessor) PreProcess(
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceNF).Errorf("point design state value for contract account %v", fact.Contract())), nil
+				Wrap(common.ErrMServiceNF).Errorf("point service state value for contract account %v", fact.Contract())), nil
 	}
 
 	approveBoxList := design.Policy().ApproveList()
