@@ -153,6 +153,10 @@ func (fact TransfersFromFact) FeePayer() base.Address {
 	return fact.sender
 }
 
+func (fact TransfersFromFact) FeeItemCount() (uint, bool) {
+	return uint(len(fact.items)), extras.HasItem
+}
+
 func (fact TransfersFromFact) FactUser() base.Address {
 	return fact.sender
 }

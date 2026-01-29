@@ -2,6 +2,7 @@ package point
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -79,6 +80,10 @@ func (fact PointFact) FeeBase() map[types.CurrencyID][]common.Big {
 
 func (fact PointFact) FeePayer() base.Address {
 	return fact.sender
+}
+
+func (fact PointFact) FeeItemCount() (uint, bool) {
+	return extras.ZeroItem, extras.HasNoItem
 }
 
 func (fact PointFact) FactUser() base.Address {
