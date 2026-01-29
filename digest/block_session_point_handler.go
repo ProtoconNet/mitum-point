@@ -1,48 +1,35 @@
 package digest
 
 import (
+	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum2/base"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (bs *BlockSession) preparePoint() error {
-	if len(bs.sts) < 1 {
-		return nil
-	}
-
-	var PointModels []mongo.WriteModel
-	var PointBalanceModels []mongo.WriteModel
-
-	for i := range bs.sts {
-		st := bs.sts[i]
-
-		switch {
-		case state.IsStateDesignKey(st.Key()):
-			j, err := bs.handlePointState(st)
-			if err != nil {
-				return err
-			}
-			PointModels = append(PointModels, j...)
-		case state.IsStatePointBalanceKey(st.Key()):
-			j, err := bs.handlePointBalanceState(st)
-			if err != nil {
-				return err
-			}
-			PointBalanceModels = append(PointBalanceModels, j...)
-		default:
-			continue
+func PreparePoint(bs *currencydigest.BlockSession, st base.State) (string, []mongo.WriteModel, error) {
+	switch {
+	case state.IsStateDesignKey(st.Key()):
+		j, err := handlePointState(bs, st)
+		if err != nil {
+			return "", nil, err
 		}
+
+		return DefaultColNamePoint, j, nil
+	case state.IsStatePointBalanceKey(st.Key()):
+		j, err := handlePointBalanceState(bs, st)
+		if err != nil {
+			return "", nil, err
+		}
+
+		return DefaultColNamePointBalance, j, nil
 	}
 
-	bs.pointModels = PointModels
-	bs.pointBalanceModels = PointBalanceModels
-
-	return nil
+	return "", nil, nil
 }
 
-func (bs *BlockSession) handlePointState(st base.State) ([]mongo.WriteModel, error) {
-	if pointDoc, err := NewPointDoc(st, bs.st.Encoder()); err != nil {
+func handlePointState(bs *currencydigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
+	if pointDoc, err := NewPointDoc(st, bs.Database().Encoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
@@ -51,8 +38,8 @@ func (bs *BlockSession) handlePointState(st base.State) ([]mongo.WriteModel, err
 	}
 }
 
-func (bs *BlockSession) handlePointBalanceState(st base.State) ([]mongo.WriteModel, error) {
-	if pointBalanceDoc, err := NewPointBalanceDoc(st, bs.st.Encoder()); err != nil {
+func handlePointBalanceState(bs *currencydigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
+	if pointBalanceDoc, err := NewPointBalanceDoc(st, bs.Database().Encoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
