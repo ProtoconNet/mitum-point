@@ -3,13 +3,27 @@ package digest
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	cdigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-point/types"
 	"net/http"
 )
 
-func (hd *Handlers) handlePoint(w http.ResponseWriter, r *http.Request) {
+var (
+	HandlerPathPoint        = `/point/{contract:(?i)` + ctypes.REStringAddressString + `}`
+	HandlerPathPointBalance = `/point/{contract:(?i)` + ctypes.REStringAddressString + `}/account/{address:(?i)` + ctypes.REStringAddressString + `}` // revive:disable-line:line-length-limit
+)
+
+func SetHandlers(hd *cdigest.Handlers) {
+	get := 1000
+	_ = hd.SetHandler(HandlerPathPointBalance, HandlePointBalance, true, get, get).
+		Methods(http.MethodOptions, "GET")
+	_ = hd.SetHandler(HandlerPathPoint, HandlePoint, true, get, get).
+		Methods(http.MethodOptions, "GET")
+}
+
+func HandlePoint(hd *cdigest.Handlers, w http.ResponseWriter, r *http.Request) {
 	cachekey := cdigest.CacheKeyPath(r)
-	if err := cdigest.LoadFromCache(hd.cache, cachekey, w); err == nil {
+	if err := cdigest.LoadFromCache(hd.Cache(), cachekey, w); err == nil {
 		return
 	}
 
@@ -20,33 +34,33 @@ func (hd *Handlers) handlePoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
-		return hd.handlePointInGroup(contract)
+	if v, err, shared := hd.RG().Do(cachekey, func() (interface{}, error) {
+		return handlePointInGroup(hd, contract)
 	}); err != nil {
 		cdigest.HTTP2HandleError(w, err)
 	} else {
-		cdigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
+		cdigest.HTTP2WriteHalBytes(hd.Encoder(), w, v.([]byte), http.StatusOK)
 		if !shared {
-			cdigest.HTTP2WriteCache(w, cachekey, hd.expireShortLived)
+			cdigest.HTTP2WriteCache(w, cachekey, hd.ExpireShortLived())
 		}
 	}
 }
 
-func (hd *Handlers) handlePointInGroup(contract string) (interface{}, error) {
-	switch design, err := Point(hd.database, contract); {
+func handlePointInGroup(hd *cdigest.Handlers, contract string) (interface{}, error) {
+	switch design, err := Point(hd.Database(), contract); {
 	case err != nil:
 		return nil, err
 	default:
-		hal, err := hd.buildPointHal(contract, *design)
+		hal, err := buildPointHal(hd, contract, *design)
 		if err != nil {
 			return nil, err
 		}
-		return hd.encoder.Marshal(hal)
+		return hd.Encoder().Marshal(hal)
 	}
 }
 
-func (hd *Handlers) buildPointHal(contract string, design types.Design) (cdigest.Hal, error) {
-	h, err := hd.combineURL(HandlerPathPoint, "contract", contract)
+func buildPointHal(hd *cdigest.Handlers, contract string, design types.Design) (cdigest.Hal, error) {
+	h, err := hd.CombineURL(HandlerPathPoint, "contract", contract)
 	if err != nil {
 		return nil, err
 	}
@@ -56,9 +70,9 @@ func (hd *Handlers) buildPointHal(contract string, design types.Design) (cdigest
 	return hal, nil
 }
 
-func (hd *Handlers) handlePointBalance(w http.ResponseWriter, r *http.Request) {
+func HandlePointBalance(hd *cdigest.Handlers, w http.ResponseWriter, r *http.Request) {
 	cachekey := cdigest.CacheKeyPath(r)
-	if err := cdigest.LoadFromCache(hd.cache, cachekey, w); err == nil {
+	if err := cdigest.LoadFromCache(hd.Cache(), cachekey, w); err == nil {
 		return
 	}
 
@@ -76,38 +90,38 @@ func (hd *Handlers) handlePointBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
-		return hd.handlePointBalanceInGroup(contract, account)
+	if v, err, shared := hd.RG().Do(cachekey, func() (interface{}, error) {
+		return handlePointBalanceInGroup(hd, contract, account)
 	}); err != nil {
 		cdigest.HTTP2HandleError(w, err)
 	} else {
-		cdigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
+		cdigest.HTTP2WriteHalBytes(hd.Encoder(), w, v.([]byte), http.StatusOK)
 		if !shared {
-			cdigest.HTTP2WriteCache(w, cachekey, hd.expireShortLived)
+			cdigest.HTTP2WriteCache(w, cachekey, hd.ExpireShortLived())
 		}
 	}
 }
 
-func (hd *Handlers) handlePointBalanceInGroup(contract, account string) (interface{}, error) {
-	switch amount, err := PointBalance(hd.database, contract, account); {
+func handlePointBalanceInGroup(hd *cdigest.Handlers, contract, account string) (interface{}, error) {
+	switch amount, err := PointBalance(hd.Database(), contract, account); {
 	case err != nil:
 		return nil, err
 	default:
-		hal, err := hd.buildPointBalanceHal(contract, account, amount)
+		hal, err := buildPointBalanceHal(hd, contract, account, amount)
 		if err != nil {
 			return nil, err
 		}
-		return hd.encoder.Marshal(hal)
+		return hd.Encoder().Marshal(hal)
 	}
 }
 
-func (hd *Handlers) buildPointBalanceHal(contract, account string, amount *common.Big) (cdigest.Hal, error) {
+func buildPointBalanceHal(hd *cdigest.Handlers, contract, account string, amount *common.Big) (cdigest.Hal, error) {
 	var hal cdigest.Hal
 
 	if amount == nil {
 		hal = cdigest.NewEmptyHal()
 	} else {
-		h, err := hd.combineURL(HandlerPathPointBalance, "contract", contract, "address", account)
+		h, err := hd.CombineURL(HandlerPathPointBalance, "contract", contract, "address", account)
 		if err != nil {
 			return nil, err
 		}
