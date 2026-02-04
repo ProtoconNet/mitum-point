@@ -5,7 +5,7 @@ import (
 	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func (a ApproveInfo) MarshalBSON() ([]byte, error) {

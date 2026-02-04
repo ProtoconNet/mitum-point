@@ -4,7 +4,7 @@ import (
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum2/base"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 func PreparePoint(bs *currencydigest.BlockSession, st base.State) (string, []mongo.WriteModel, error) {
