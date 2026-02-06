@@ -2,9 +2,9 @@ package cmds
 
 import (
 	"context"
-	"github.com/ProtoconNet/mitum-point/operation/point"
 
 	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	"github.com/ProtoconNet/mitum-point/operation/point"
 	"github.com/ProtoconNet/mitum-point/utils"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"

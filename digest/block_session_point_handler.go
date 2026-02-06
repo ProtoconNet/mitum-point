@@ -1,13 +1,13 @@
 package digest
 
 import (
-	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	cdigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-point/state"
 	"github.com/ProtoconNet/mitum2/base"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-func PreparePoint(bs *currencydigest.BlockSession, st base.State) (string, []mongo.WriteModel, error) {
+func PreparePoint(bs *cdigest.BlockSession, st base.State) (string, []mongo.WriteModel, error) {
 	switch {
 	case state.IsStateDesignKey(st.Key()):
 		j, err := handlePointState(bs, st)
@@ -28,7 +28,7 @@ func PreparePoint(bs *currencydigest.BlockSession, st base.State) (string, []mon
 	return "", nil, nil
 }
 
-func handlePointState(bs *currencydigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
+func handlePointState(bs *cdigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
 	if pointDoc, err := NewPointDoc(st, bs.Database().Encoder()); err != nil {
 		return nil, err
 	} else {
@@ -38,7 +38,7 @@ func handlePointState(bs *currencydigest.BlockSession, st base.State) ([]mongo.W
 	}
 }
 
-func handlePointBalanceState(bs *currencydigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
+func handlePointBalanceState(bs *cdigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
 	if pointBalanceDoc, err := NewPointBalanceDoc(st, bs.Database().Encoder()); err != nil {
 		return nil, err
 	} else {
