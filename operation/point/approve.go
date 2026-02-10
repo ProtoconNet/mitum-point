@@ -3,7 +3,7 @@ package point
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
-	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -16,60 +16,69 @@ var (
 	ApproveHint     = hint.MustNewHint("mitum-point-approve-operation-v0.0.1")
 )
 
+var MaxApproveItems = 100
+
 type ApproveFact struct {
-	PointFact
-	approved base.Address
-	amount   common.Big
+	base.BaseFact
+	sender base.Address
+	items  []ApproveItem
 }
 
 func NewApproveFact(
 	token []byte,
-	sender, contract base.Address,
-	currency ctypes.CurrencyID,
-	approved base.Address,
-	amount common.Big,
+	sender base.Address,
+	items []ApproveItem,
 ) ApproveFact {
 	fact := ApproveFact{
-		PointFact: NewPointFact(
-			base.NewBaseFact(ApproveFactHint, token), sender, contract, currency,
-		),
-		approved: approved,
-		amount:   amount,
+		BaseFact: base.NewBaseFact(ApproveFactHint, token),
+		sender:   sender,
+		items:    items,
 	}
 	fact.SetHash(fact.GenerateHash())
 	return fact
 }
 
 func (fact ApproveFact) IsValid(b []byte) error {
-	if err := fact.PointFact.IsValid(nil); err != nil {
+	if err := fact.BaseHinter.IsValid(nil); err != nil {
 		return common.ErrFactInvalid.Wrap(err)
 	}
 
-	if err := fact.approved.IsValid(nil); err != nil {
-		return common.ErrFactInvalid.Wrap(err)
+	if l := len(fact.items); l < 1 {
+		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("empty items for ApproveFact")))
+	} else if l > int(MaxTransferItems) {
+		return common.ErrFactInvalid.Wrap(
+			common.ErrArrayLen.Wrap(errors.Errorf("items over allowed, %d > %d", l, MaxApproveItems)))
 	}
 
-	if fact.sender.Equal(fact.approved) {
-		return common.ErrFactInvalid.Wrap(
-			common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with approved", fact.sender)))
+	if err := util.CheckIsValiders(nil, false,
+		fact.BaseFact,
+		fact.sender,
+	); err != nil {
+		return err
 	}
 
-	if fact.contract.Equal(fact.approved) {
-		return common.ErrFactInvalid.Wrap(
-			common.ErrSelfTarget.Wrap(
-				errors.Errorf("approve %v is is same with contract account", fact.approved)))
-	}
+	founds := map[string]struct{}{}
+	for _, item := range fact.items {
+		if err := item.IsValid(nil); err != nil {
+			return common.ErrFactInvalid.Wrap(err)
+		}
 
-	if !fact.amount.OverNil() {
-		return common.ErrFactInvalid.Wrap(
-			common.ErrValOOR.Wrap(
-				errors.Errorf("approve amount must be greater than or equal to zero, got %v", fact.amount)))
+		if fact.sender.Equal(item.contract) {
+			return common.ErrFactInvalid.Wrap(
+				common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
+		}
+
+		if _, found := founds[item.contract.String()+"-"+item.approved.String()]; found {
+			return common.ErrFactInvalid.Wrap(
+				common.ErrDupVal.Wrap(errors.Errorf("contract account %v", item.contract)))
+		}
+
+		founds[item.Contract().String()] = struct{}{}
 	}
 
 	if err := common.IsValidOperationFact(fact, b); err != nil {
 		return common.ErrFactInvalid.Wrap(err)
 	}
-
 	return nil
 }
 
@@ -78,33 +87,87 @@ func (fact ApproveFact) GenerateHash() util.Hash {
 }
 
 func (fact ApproveFact) Bytes() []byte {
+	is := make([][]byte, len(fact.items))
+	for i := range fact.items {
+		is[i] = fact.items[i].Bytes()
+	}
+
 	return util.ConcatBytesSlice(
-		fact.PointFact.Bytes(),
-		fact.approved.Bytes(),
-		fact.amount.Bytes(),
+		fact.Token(),
+		fact.sender.Bytes(),
+		util.ConcatBytesSlice(is...),
 	)
 }
 
-func (fact ApproveFact) Approved() base.Address {
-	return fact.approved
+func (fact ApproveFact) Token() base.Token {
+	return fact.BaseFact.Token()
 }
 
-func (fact ApproveFact) Amount() common.Big {
-	return fact.amount
+func (fact ApproveFact) Sender() base.Address {
+	return fact.sender
+}
+
+func (fact ApproveFact) Items() []ApproveItem {
+	return fact.items
 }
 
 func (fact ApproveFact) Addresses() ([]base.Address, error) {
 	var as []base.Address
 
-	as = append(as, fact.PointFact.Sender())
-	as = append(as, fact.PointFact.Contract())
-	as = append(as, fact.approved)
+	for i := range fact.items {
+		if ads, err := fact.items[i].Addresses(); err != nil {
+			return nil, err
+		} else {
+			as = append(as, ads...)
+		}
+	}
+
+	as = append(as, fact.Sender())
 
 	return as, nil
 }
 
+func (fact ApproveFact) FeeBase() map[types.CurrencyID][]common.Big {
+	required := make(map[types.CurrencyID][]common.Big)
+
+	for i := range fact.items {
+		zeroBig := common.ZeroBig
+		cid := fact.items[i].Currency()
+		var amsTemp []common.Big
+		if ams, found := required[cid]; found {
+			ams = append(ams, zeroBig)
+			required[cid] = ams
+		} else {
+			amsTemp = append(amsTemp, zeroBig)
+			required[cid] = amsTemp
+		}
+	}
+
+	return required
+}
+
+func (fact ApproveFact) FeePayer() base.Address {
+	return fact.sender
+}
+
+func (fact ApproveFact) FeeItemCount() (uint, bool) {
+	return uint(len(fact.items)), extras.HasItem
+}
+
+func (fact ApproveFact) FactUser() base.Address {
+	return fact.sender
+}
+
+func (fact ApproveFact) Signer() base.Address {
+	return fact.sender
+}
+
 func (fact ApproveFact) ActiveContract() []base.Address {
-	return []base.Address{fact.contract}
+	var arr []base.Address
+	for i := range fact.items {
+		arr = append(arr, fact.items[i].contract)
+	}
+	return arr
 }
 
 type Approve struct {

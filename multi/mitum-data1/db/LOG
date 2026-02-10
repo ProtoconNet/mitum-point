@@ -1,0 +1,10 @@
+=============== Feb 10, 2026 (KST) ===============
+12:34:12.291038 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+12:34:12.303856 db@open opening
+12:34:12.304582 version@stat F·[] S·0B[] Sc·[]
+12:34:12.308829 db@janitor F·2 G·0
+12:34:12.308857 db@open done T·4.976084ms
+12:34:12.326131 memdb@flush N·0 S·0B
+12:34:12.326140 memdb@flush skipping
+12:34:12.326182 journal@remove removed @1
+12:34:12.326191 table@compaction range L-1 "":""

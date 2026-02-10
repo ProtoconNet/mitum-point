@@ -4,40 +4,64 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
+	"github.com/ProtoconNet/mitum2/util/hint"
+	"github.com/ProtoconNet/mitum2/util/valuehash"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func (fact TransferFromFact) MarshalBSON() ([]byte, error) {
-	m := fact.PointFact.marshalMap()
-
-	m["receiver"] = fact.receiver
-	m["target"] = fact.target
-	m["amount"] = fact.amount
-
-	return bsonenc.Marshal(m)
+	return bsonenc.Marshal(bson.M{
+		"_hint":  fact.Hint().String(),
+		"hash":   fact.BaseFact.Hash().String(),
+		"token":  fact.BaseFact.Token(),
+		"sender": fact.sender,
+		"items":  fact.items,
+	})
 }
 
 type TransferFromFactBSONUnmarshaler struct {
-	Receiver string `bson:"receiver"`
-	Target   string `bson:"target"`
-	Amount   string `bson:"amount"`
+	Hint   string   `bson:"_hint"`
+	Sender string   `bson:"sender"`
+	Items  bson.Raw `bson:"items"`
 }
 
 func (fact *TransferFromFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	if err := fact.PointFact.DecodeBSON(b, enc); err != nil {
+	var u common.BaseFactBSONUnmarshaler
+
+	err := enc.Unmarshal(b, &u)
+	if err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
 
-	var uf TransferFromFactBSONUnmarshaler
+	fact.BaseFact.SetHash(valuehash.NewBytesFromString(u.Hash))
+	fact.BaseFact.SetToken(u.Token)
+
+	var uf TransferFactBSONUnmarshaler
 	if err := bson.Unmarshal(b, &uf); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
 
-	if err := fact.unpack(enc, uf.Receiver, uf.Target, uf.Amount); err != nil {
+	ht, err := hint.ParseHint(uf.Hint)
+	if err != nil {
+		return common.DecorateError(err, common.ErrDecodeBson, *fact)
+	}
+	fact.BaseHinter = hint.NewBaseHinter(ht)
+
+	if err := fact.unpack(enc, uf.Sender, uf.Items); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
 
 	return nil
+}
+
+func (op TransferFrom) MarshalBSON() ([]byte, error) {
+	return bsonenc.Marshal(
+		bson.M{
+			"_hint": op.Hint().String(),
+			"hash":  op.Hash().String(),
+			"fact":  op.Fact(),
+			"signs": op.Signs(),
+		})
 }
 
 func (op *TransferFrom) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {

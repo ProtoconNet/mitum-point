@@ -1,6 +1,8 @@
 package point
 
 import (
+	"encoding/json"
+
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	"github.com/ProtoconNet/mitum2/base"
@@ -9,38 +11,34 @@ import (
 )
 
 type TransferFromFactJSONMarshaler struct {
-	PointFactJSONMarshaler
-	Receiver base.Address `json:"receiver"`
-	Target   base.Address `json:"target"`
-	Amount   common.Big   `json:"amount"`
+	base.BaseFactJSONMarshaler
+	Sender base.Address       `json:"sender"`
+	Items  []TransferFromItem `json:"items"`
 }
 
 func (fact TransferFromFact) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(TransferFromFactJSONMarshaler{
-		PointFactJSONMarshaler: fact.PointFact.JSONMarshaler(),
-		Receiver:               fact.receiver,
-		Target:                 fact.target,
-		Amount:                 fact.amount,
+		BaseFactJSONMarshaler: fact.BaseFact.JSONMarshaler(),
+		Sender:                fact.sender,
+		Items:                 fact.items,
 	})
 }
 
-type TransferFromFactJSONUnMarshaler struct {
-	Receiver string `json:"receiver"`
-	Target   string `json:"target"`
-	Amount   string `json:"amount"`
+type TransferFromFactJSONUnmarshaler struct {
+	base.BaseFactJSONUnmarshaler
+	Sender string          `json:"sender"`
+	Items  json.RawMessage `json:"items"`
 }
 
 func (fact *TransferFromFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	if err := fact.PointFact.DecodeJSON(b, enc); err != nil {
+	var u TransferFromFactJSONUnmarshaler
+	if err := enc.Unmarshal(b, &u); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
-	var uf TransferFromFactJSONUnMarshaler
-	if err := enc.Unmarshal(b, &uf); err != nil {
-		return common.DecorateError(err, common.ErrDecodeJson, *fact)
-	}
+	fact.BaseFact.SetJSONUnmarshaler(u.BaseFactJSONUnmarshaler)
 
-	if err := fact.unpack(enc, uf.Receiver, uf.Target, uf.Amount); err != nil {
+	if err := fact.unpack(enc, u.Sender, u.Items); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 

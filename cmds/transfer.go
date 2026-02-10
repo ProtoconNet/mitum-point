@@ -13,7 +13,7 @@ import (
 
 type TransferCommand struct {
 	OperationCommand
-	Receiver ccmds.AddressFlag `arg:"" name:"receiver" help:"point receiver" required:"true"`
+	Receiver ccmds.AddressFlag `arg:"" name:"receiver" help:"token receiver" required:"true"`
 	Amount   ccmds.BigFlag     `arg:"" name:"amount" help:"amount to transfer" required:"true"`
 	receiver base.Address
 }
@@ -54,12 +54,11 @@ func (cmd *TransferCommand) parseFlags() error {
 func (cmd *TransferCommand) createOperation() (base.Operation, error) { // nolint:dupl}
 	e := util.StringError(utils.ErrStringCreate("transfer operation"))
 
+	item := point.NewTransferItem(cmd.contract,
+		cmd.receiver, cmd.Amount.Big, cmd.Currency.CID)
+
 	fact := point.NewTransferFact(
-		[]byte(cmd.Token),
-		cmd.sender, cmd.contract,
-		cmd.Currency.CID,
-		cmd.receiver,
-		cmd.Amount.Big,
+		[]byte(cmd.Token), cmd.sender, []point.TransferItem{item},
 	)
 
 	op := point.NewTransfer(fact)

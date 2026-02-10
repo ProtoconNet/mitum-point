@@ -1,6 +1,8 @@
 package point
 
 import (
+	"encoding/json"
+
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	"github.com/ProtoconNet/mitum2/base"
@@ -9,35 +11,34 @@ import (
 )
 
 type TransferFactJSONMarshaler struct {
-	PointFactJSONMarshaler
-	Receiver base.Address `json:"receiver"`
-	Amount   common.Big   `json:"amount"`
+	base.BaseFactJSONMarshaler
+	Sender base.Address   `json:"sender"`
+	Items  []TransferItem `json:"items"`
 }
 
 func (fact TransferFact) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(TransferFactJSONMarshaler{
-		PointFactJSONMarshaler: fact.PointFact.JSONMarshaler(),
-		Receiver:               fact.receiver,
-		Amount:                 fact.amount,
+		BaseFactJSONMarshaler: fact.BaseFact.JSONMarshaler(),
+		Sender:                fact.sender,
+		Items:                 fact.items,
 	})
 }
 
-type TransferFactJSONUnMarshaler struct {
-	Receiver string `json:"receiver"`
-	Amount   string `json:"amount"`
+type TransferFactJSONUnmarshaler struct {
+	base.BaseFactJSONUnmarshaler
+	Sender string          `json:"sender"`
+	Items  json.RawMessage `json:"items"`
 }
 
 func (fact *TransferFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	if err := fact.PointFact.DecodeJSON(b, enc); err != nil {
+	var u TransferFactJSONUnmarshaler
+	if err := enc.Unmarshal(b, &u); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
-	var uf TransferFactJSONUnMarshaler
-	if err := enc.Unmarshal(b, &uf); err != nil {
-		return common.DecorateError(err, common.ErrDecodeJson, *fact)
-	}
+	fact.BaseFact.SetJSONUnmarshaler(u.BaseFactJSONUnmarshaler)
 
-	if err := fact.unpack(enc, uf.Receiver, uf.Amount); err != nil {
+	if err := fact.unpack(enc, u.Sender, u.Items); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 

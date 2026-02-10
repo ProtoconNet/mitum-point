@@ -3,7 +3,7 @@ package point
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
-	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -16,49 +16,78 @@ var (
 	TransferHint     = hint.MustNewHint("mitum-point-transfer-operation-v0.0.1")
 )
 
+var MaxTransferItems = 100
+
 type TransferFact struct {
-	PointFact
-	receiver base.Address
-	amount   common.Big
+	base.BaseFact
+	sender base.Address
+	items  []TransferItem
 }
 
 func NewTransferFact(
 	token []byte,
-	sender, contract base.Address,
-	currency ctypes.CurrencyID,
-	receiver base.Address,
-	amount common.Big,
+	sender base.Address,
+	items []TransferItem,
 ) TransferFact {
 	fact := TransferFact{
-		PointFact: NewPointFact(
-			base.NewBaseFact(TransferFactHint, token), sender, contract, currency,
-		),
-		receiver: receiver,
-		amount:   amount,
+		BaseFact: base.NewBaseFact(TransferFactHint, token),
+		sender:   sender,
+		items:    items,
 	}
 	fact.SetHash(fact.GenerateHash())
 	return fact
 }
 
 func (fact TransferFact) IsValid(b []byte) error {
-	if err := fact.PointFact.IsValid(nil); err != nil {
+	if err := fact.BaseHinter.IsValid(nil); err != nil {
 		return common.ErrFactInvalid.Wrap(err)
 	}
 
-	if err := fact.receiver.IsValid(nil); err != nil {
-		return common.ErrFactInvalid.Wrap(err)
+	if l := len(fact.items); l < 1 {
+		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("empty items for TransferFact")))
+	} else if l > int(MaxTransferItems) {
+		return common.ErrFactInvalid.Wrap(
+			common.ErrArrayLen.Wrap(errors.Errorf("items over allowed, %d > %d", l, MaxTransferItems)))
 	}
 
-	if fact.sender.Equal(fact.receiver) {
-		return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with receiver", fact.sender)))
+	if err := util.CheckIsValiders(nil, false,
+		fact.BaseFact,
+		fact.sender,
+	); err != nil {
+		return err
 	}
 
-	if fact.contract.Equal(fact.receiver) {
-		return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("receiver %v is same with contract account", fact.receiver)))
-	}
+	founds := map[string]struct{}{}
+	for _, item := range fact.items {
+		if err := item.IsValid(nil); err != nil {
+			return common.ErrFactInvalid.Wrap(err)
+		}
 
-	if !fact.amount.OverZero() {
-		return common.ErrFactInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("transfer amount must be over zero, got %v", fact.amount)))
+		if fact.sender.Equal(item.contract) {
+			return common.ErrFactInvalid.Wrap(
+				common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
+		}
+
+		if fact.sender.Equal(item.receiver) {
+			return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with receiver", fact.sender)))
+		}
+
+		if item.contract.Equal(item.receiver) {
+			return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("receiver %v is same with contract account", item.receiver)))
+		}
+
+		if !item.amount.OverZero() {
+			return common.ErrFactInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("transfer amount must be over zero, got %v", item.amount)))
+		}
+
+		if _, found := founds[item.contract.String()+"-"+item.receiver.String()]; found {
+			return common.ErrFactInvalid.Wrap(
+				common.ErrDupVal.Wrap(
+					errors.Errorf(
+						"receiver account %v in contract account %v", item.receiver, item.contract)))
+		}
+
+		founds[item.contract.String()+"-"+item.receiver.String()] = struct{}{}
 	}
 
 	if err := common.IsValidOperationFact(fact, b); err != nil {
@@ -72,33 +101,87 @@ func (fact TransferFact) GenerateHash() util.Hash {
 }
 
 func (fact TransferFact) Bytes() []byte {
+	is := make([][]byte, len(fact.items))
+	for i := range fact.items {
+		is[i] = fact.items[i].Bytes()
+	}
+
 	return util.ConcatBytesSlice(
-		fact.PointFact.Bytes(),
-		fact.receiver.Bytes(),
-		fact.amount.Bytes(),
+		fact.Token(),
+		fact.sender.Bytes(),
+		util.ConcatBytesSlice(is...),
 	)
 }
 
-func (fact TransferFact) Receiver() base.Address {
-	return fact.receiver
+func (fact TransferFact) Token() base.Token {
+	return fact.BaseFact.Token()
 }
 
-func (fact TransferFact) Amount() common.Big {
-	return fact.amount
+func (fact TransferFact) Sender() base.Address {
+	return fact.sender
+}
+
+func (fact TransferFact) Items() []TransferItem {
+	return fact.items
 }
 
 func (fact TransferFact) Addresses() ([]base.Address, error) {
 	var as []base.Address
 
-	as = append(as, fact.PointFact.Sender())
-	as = append(as, fact.PointFact.Contract())
-	as = append(as, fact.receiver)
+	for i := range fact.items {
+		if ads, err := fact.items[i].Addresses(); err != nil {
+			return nil, err
+		} else {
+			as = append(as, ads...)
+		}
+	}
+
+	as = append(as, fact.Sender())
 
 	return as, nil
 }
 
+func (fact TransferFact) FeeBase() map[types.CurrencyID][]common.Big {
+	required := make(map[types.CurrencyID][]common.Big)
+
+	for i := range fact.items {
+		zeroBig := common.ZeroBig
+		cid := fact.items[i].Currency()
+		var amsTemp []common.Big
+		if ams, found := required[cid]; found {
+			ams = append(ams, zeroBig)
+			required[cid] = ams
+		} else {
+			amsTemp = append(amsTemp, zeroBig)
+			required[cid] = amsTemp
+		}
+	}
+
+	return required
+}
+
+func (fact TransferFact) FeePayer() base.Address {
+	return fact.sender
+}
+
+func (fact TransferFact) FeeItemCount() (uint, bool) {
+	return uint(len(fact.items)), extras.HasItem
+}
+
+func (fact TransferFact) FactUser() base.Address {
+	return fact.sender
+}
+
+func (fact TransferFact) Signer() base.Address {
+	return fact.sender
+}
+
 func (fact TransferFact) ActiveContract() []base.Address {
-	return []base.Address{fact.contract}
+	var arr []base.Address
+	for i := range fact.items {
+		arr = append(arr, fact.items[i].contract)
+	}
+	return arr
 }
 
 type Transfer struct {

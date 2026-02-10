@@ -26,14 +26,11 @@ var AddedHinters = []encoder.DecodeDetail{
 	{Hint: point.MintHint, Instance: point.Mint{}},
 	{Hint: point.BurnHint, Instance: point.Burn{}},
 	{Hint: point.ApproveHint, Instance: point.Approve{}},
-	{Hint: point.ApprovesHint, Instance: point.Approves{}},
-	{Hint: point.ApprovesItemHint, Instance: point.ApprovesItem{}},
+	{Hint: point.ApproveItemHint, Instance: point.ApproveItem{}},
 	{Hint: point.TransferHint, Instance: point.Transfer{}},
-	{Hint: point.TransfersHint, Instance: point.Transfers{}},
-	{Hint: point.TransfersItemHint, Instance: point.TransfersItem{}},
+	{Hint: point.TransferItemHint, Instance: point.TransferItem{}},
 	{Hint: point.TransferFromHint, Instance: point.TransferFrom{}},
-	{Hint: point.TransfersFromHint, Instance: point.TransfersFrom{}},
-	{Hint: point.TransfersFromItemHint, Instance: point.TransfersFromItem{}},
+	{Hint: point.TransferFromItemHint, Instance: point.TransferFromItem{}},
 }
 
 var AddedSupportedHinters = []encoder.DecodeDetail{
@@ -41,11 +38,8 @@ var AddedSupportedHinters = []encoder.DecodeDetail{
 	{Hint: point.MintFactHint, Instance: point.MintFact{}},
 	{Hint: point.BurnFactHint, Instance: point.BurnFact{}},
 	{Hint: point.ApproveFactHint, Instance: point.ApproveFact{}},
-	{Hint: point.ApprovesFactHint, Instance: point.ApprovesFact{}},
 	{Hint: point.TransferFactHint, Instance: point.TransferFact{}},
-	{Hint: point.TransfersFactHint, Instance: point.TransfersFact{}},
 	{Hint: point.TransferFromFactHint, Instance: point.TransferFromFact{}},
-	{Hint: point.TransfersFromFactHint, Instance: point.TransfersFromFact{}},
 }
 
 func init() {

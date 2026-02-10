@@ -54,12 +54,11 @@ func (cmd *ApproveCommand) parseFlags() error {
 func (cmd *ApproveCommand) createOperation() (base.Operation, error) { // nolint:dupl}
 	e := util.StringError(utils.ErrStringCreate("approve operation"))
 
+	item := point.NewApproveItem(cmd.contract,
+		cmd.approved, cmd.Amount.Big, cmd.Currency.CID)
+
 	fact := point.NewApproveFact(
-		[]byte(cmd.Token),
-		cmd.sender, cmd.contract,
-		cmd.Currency.CID,
-		cmd.approved,
-		cmd.Amount.Big,
+		[]byte(cmd.Token), cmd.sender, []point.ApproveItem{item},
 	)
 
 	op := point.NewApprove(fact)
